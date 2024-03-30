@@ -4,17 +4,42 @@ use serde_json::Value;
 
 pgrx::pg_module_magic!();
 
+// id_for returns the schema `$id` for $x, falling back on "schema.json" if $x
+// has no `$id`.
+macro_rules! id_for {
+    ($x:expr) => {
+        if let Value::String(s) = &$x["$id"] {
+            s
+        } else {
+            "schema.json"
+        }
+    };
+}
+
+// Converts schemas from `pgrx::Array<_>` to `Vec<serde_json::Value>` and
+// returns the result. Used by the variadic functions.
+macro_rules! values_for {
+    ($x:expr) => {
+        $x.iter()
+            .map(|x| match x {
+                Some(s) => s.0,
+                None => error!("NULL schema"),
+            })
+            .collect::<Vec<_>>()
+    };
+}
+
 // pg_jsonschema-compatible functions.
 #[pg_extern(immutable, strict)]
 fn json_matches_schema(schema: pgrx::Json, instance: pgrx::Json) -> bool {
     let schemas = [schema.0];
-    validate(id_for(&schemas[0]), &schemas, instance.0)
+    validate(id_for!(&schemas[0]), &schemas, instance.0)
 }
 
 #[pg_extern(immutable, strict)]
 fn jsonb_matches_schema(schema: pgrx::Json, instance: pgrx::JsonB) -> bool {
     let schemas = [schema.0];
-    validate(id_for(&schemas[0]), &schemas, instance.0)
+    validate(id_for!(&schemas[0]), &schemas, instance.0)
 }
 
 // Schema validation functions.
@@ -27,24 +52,24 @@ fn jsonb_matches_schema(schema: pgrx::Json, instance: pgrx::JsonB) -> bool {
 #[pg_extern(immutable, strict, name = "jsonschema_is_valid")]
 fn json_schema_is_valid(schema: pgrx::Json) -> bool {
     let schemas = [schema.0];
-    compiles(id_for(&schemas[0]), &schemas)
+    compiles(id_for!(&schemas[0]), &schemas)
 }
 
 #[pg_extern(immutable, strict, name = "jsonschema_is_valid")]
 fn jsonb_schema_is_valid(schema: pgrx::JsonB) -> bool {
     let schemas = [schema.0];
-    compiles(id_for(&schemas[0]), &schemas)
+    compiles(id_for!(&schemas[0]), &schemas)
 }
 
 #[pg_extern(immutable, strict, name = "jsonschema_is_valid")]
 fn json_schema_id_is_valid(id: &str, schemas: pgrx::VariadicArray<pgrx::Json>) -> bool {
-    let schemas = convert_jsons(schemas);
+    let schemas = values_for!(schemas);
     compiles(id, &schemas)
 }
 
 #[pg_extern(immutable, strict, name = "jsonschema_is_valid")]
 fn jsonb_schema_id_is_valid(id: &str, schemas: pgrx::VariadicArray<pgrx::JsonB>) -> bool {
-    let schemas = convert_jsonbs(schemas);
+    let schemas = values_for!(schemas);
     compiles(id, &schemas)
 }
 
@@ -58,25 +83,25 @@ fn jsonb_schema_id_is_valid(id: &str, schemas: pgrx::VariadicArray<pgrx::JsonB>)
 #[pg_extern(immutable, strict, name = "jsonschema_validates")]
 fn json_schema_validates_json(json: pgrx::Json, schema: pgrx::Json) -> bool {
     let schemas = [schema.0];
-    validate(id_for(&schemas[0]), &schemas, json.0)
+    validate(id_for!(&schemas[0]), &schemas, json.0)
 }
 
 #[pg_extern(immutable, strict, name = "jsonschema_validates")]
 fn jsonb_schema_validates_jsonb(json: pgrx::JsonB, schema: pgrx::JsonB) -> bool {
     let schemas = [schema.0];
-    validate(id_for(&schemas[0]), &schemas, json.0)
+    validate(id_for!(&schemas[0]), &schemas, json.0)
 }
 
 #[pg_extern(immutable, strict, name = "jsonschema_validates")]
 fn json_schema_validates_jsonb(json: pgrx::Json, schema: pgrx::JsonB) -> bool {
     let schemas = [schema.0];
-    validate(id_for(&schemas[0]), &schemas, json.0)
+    validate(id_for!(&schemas[0]), &schemas, json.0)
 }
 
 #[pg_extern(immutable, strict, name = "jsonschema_validates")]
 fn jsonb_schema_validates_json(json: pgrx::JsonB, schema: pgrx::Json) -> bool {
     let schemas = [schema.0];
-    validate(id_for(&schemas[0]), &schemas, json.0)
+    validate(id_for!(&schemas[0]), &schemas, json.0)
 }
 
 // jsonschema_validates(doc::json,  id::text, VARIADIC schema::json)
@@ -90,7 +115,7 @@ fn json_schema_id_validates_json(
     id: &str,
     schemas: pgrx::VariadicArray<pgrx::Json>,
 ) -> bool {
-    let schemas = convert_jsons(schemas);
+    let schemas = values_for!(schemas);
     validate(id, &schemas, json.0)
 }
 
@@ -100,7 +125,7 @@ fn jsonb_schema_id_validates_jsonb(
     id: &str,
     schemas: pgrx::VariadicArray<pgrx::JsonB>,
 ) -> bool {
-    let schemas = convert_jsonbs(schemas);
+    let schemas = values_for!(schemas);
     validate(id, &schemas, json.0)
 }
 
@@ -110,7 +135,7 @@ fn json_schema_id_validates_jsonb(
     id: &str,
     schemas: pgrx::VariadicArray<pgrx::JsonB>,
 ) -> bool {
-    let schemas = convert_jsonbs(schemas);
+    let schemas = values_for!(schemas);
     validate(id, &schemas, json.0)
 }
 
@@ -120,49 +145,15 @@ fn jsonb_schema_id_validates_json(
     id: &str,
     schemas: pgrx::VariadicArray<pgrx::Json>,
 ) -> bool {
-    let schemas = convert_jsons(schemas);
+    let schemas = values_for!(schemas);
     validate(id, &schemas, json.0)
-}
-
-/// Converts schemas from `pgrx::Array<pgrx::Json>` and returns the result.
-/// Used by the functions that take multiple
-fn convert_jsons(schemas: pgrx::VariadicArray<pgrx::Json>) -> Vec<Value> {
-    schemas
-        .iter()
-        .map(|x| match x {
-            Some(s) => s.0,
-            None => {
-                error!("NULL schema");
-            }
-        })
-        .collect::<Vec<_>>()
-}
-
-fn convert_jsonbs(schemas: pgrx::VariadicArray<pgrx::JsonB>) -> Vec<Value> {
-    schemas
-        .iter()
-        .map(|x| match x {
-            Some(s) => s.0,
-            None => {
-                error!("NULL schema");
-            }
-        })
-        .collect::<Vec<_>>()
-}
-
-fn id_for(s: &Value) -> &str {
-    if let Value::String(s) = &s["$id"] {
-        return s;
-    };
-    "schema.json"
 }
 
 fn new_compiler(id: &str, schemas: &[Value]) -> Option<Compiler> {
     let mut compiler = Compiler::new();
 
     if schemas.is_empty() {
-        // notice!("{e}");
-        println!("No schemas passed to jsonschema_compile");
+        notice!("No schemas passed to jsonschema_compile");
         return None;
     }
 
@@ -182,8 +173,7 @@ fn new_compiler(id: &str, schemas: &[Value]) -> Option<Compiler> {
         };
 
         if let Err(e) = compiler.add_resource(&sid, s.clone()) {
-            // notice!("{e}");
-            println!("{e}");
+            notice!("{e}");
             return None;
         }
     }
@@ -195,8 +185,7 @@ fn compiles(id: &str, schemas: &[Value]) -> bool {
     if let Some(mut c) = new_compiler(id, schemas) {
         let mut schemas = Schemas::new();
         if let Err(e) = c.compile(id, &mut schemas) {
-            // notice!("{e}");
-            println!("{e}");
+            notice!("{e}");
             return false;
         }
         return true;
@@ -210,18 +199,19 @@ pub fn validate(id: &str, schemas: &[Value], instance: Value) -> bool {
         let mut schemas = Schemas::new();
         match c.compile(id, &mut schemas) {
             Err(e) => {
-                println!("{e}");
+                notice!("{e}");
                 return false;
             }
             Ok(index) => {
                 if let Err(e) = schemas.validate(&instance, index) {
-                    println!("{e}");
+                    notice!("{e}");
                     return false;
                 }
                 return true;
             }
         }
     }
+
     false
 }
 
