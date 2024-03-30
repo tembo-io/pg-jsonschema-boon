@@ -8,32 +8,32 @@ pgrx::pg_module_magic!();
 #[pg_extern(immutable, strict)]
 fn json_matches_schema(schema: pgrx::Json, instance: pgrx::Json) -> bool {
     let schemas = [schema.0];
-    validate(id_for(&schemas), &schemas, instance.0)
+    validate(id_for(&schemas[0]), &schemas, instance.0)
 }
 
 #[pg_extern(immutable, strict)]
 fn jsonb_matches_schema(schema: pgrx::Json, instance: pgrx::JsonB) -> bool {
     let schemas = [schema.0];
-    validate(id_for(&schemas), &schemas, instance.0)
+    validate(id_for(&schemas[0]), &schemas, instance.0)
 }
 
 // Schema validation functions.
+
+// jsonschema_is_valid(schema::json)
+// jsonschema_is_valid(schema::jsonb)
+// jsonschema_is_valid(id::text, VARIADIC schema::json)
+// jsonschema_is_valid(id::text, VARIADIC schema::jsonb)
+
 #[pg_extern(immutable, strict, name = "jsonschema_is_valid")]
-fn jsonb_schemas_are_valid(schemas: pgrx::VariadicArray<pgrx::JsonB>) -> bool {
-    let schemas = convert_jsonbs(schemas);
-    compiles(id_for(&schemas), &schemas)
+fn json_schema_is_valid(schema: pgrx::Json) -> bool {
+    let schemas = [schema.0];
+    compiles(id_for(&schemas[0]), &schemas)
 }
 
 #[pg_extern(immutable, strict, name = "jsonschema_is_valid")]
-fn json_schemas_are_valid(schemas: pgrx::VariadicArray<pgrx::Json>) -> bool {
-    let schemas = convert_jsons(schemas);
-    compiles(id_for(&schemas), &schemas)
-}
-
-#[pg_extern(immutable, strict, name = "jsonschema_is_valid")]
-fn jsonb_schema_id_is_valid(id: &str, schemas: pgrx::VariadicArray<pgrx::JsonB>) -> bool {
-    let schemas = convert_jsonbs(schemas);
-    compiles(id, &schemas)
+fn jsonb_schema_is_valid(schema: pgrx::JsonB) -> bool {
+    let schemas = [schema.0];
+    compiles(id_for(&schemas[0]), &schemas)
 }
 
 #[pg_extern(immutable, strict, name = "jsonschema_is_valid")]
@@ -42,29 +42,86 @@ fn json_schema_id_is_valid(id: &str, schemas: pgrx::VariadicArray<pgrx::Json>) -
     compiles(id, &schemas)
 }
 
+#[pg_extern(immutable, strict, name = "jsonschema_is_valid")]
+fn jsonb_schema_id_is_valid(id: &str, schemas: pgrx::VariadicArray<pgrx::JsonB>) -> bool {
+    let schemas = convert_jsonbs(schemas);
+    compiles(id, &schemas)
+}
+
 // Document validation functions.
-#[pg_extern(immutable, strict, name = "json_is_valid")]
-fn json_is_valid(json: pgrx::Json, id: &str, schemas: pgrx::VariadicArray<pgrx::Json>) -> bool {
+
+// jsonschema_validates(doc::json,  schema::json)
+// jsonschema_validates(doc::jsonb, schema::jsonb)
+// jsonschema_validates(doc::json,  schema::jsonb)
+// jsonschema_validates(doc::jsonb, schema::json)
+
+#[pg_extern(immutable, strict, name = "jsonschema_validates")]
+fn json_schema_validates_json(json: pgrx::Json, schema: pgrx::Json) -> bool {
+    let schemas = [schema.0];
+    validate(id_for(&schemas[0]), &schemas, json.0)
+}
+
+#[pg_extern(immutable, strict, name = "jsonschema_validates")]
+fn jsonb_schema_validates_jsonb(json: pgrx::JsonB, schema: pgrx::JsonB) -> bool {
+    let schemas = [schema.0];
+    validate(id_for(&schemas[0]), &schemas, json.0)
+}
+
+#[pg_extern(immutable, strict, name = "jsonschema_validates")]
+fn json_schema_validates_jsonb(json: pgrx::Json, schema: pgrx::JsonB) -> bool {
+    let schemas = [schema.0];
+    validate(id_for(&schemas[0]), &schemas, json.0)
+}
+
+#[pg_extern(immutable, strict, name = "jsonschema_validates")]
+fn jsonb_schema_validates_json(json: pgrx::JsonB, schema: pgrx::Json) -> bool {
+    let schemas = [schema.0];
+    validate(id_for(&schemas[0]), &schemas, json.0)
+}
+
+// jsonschema_validates(doc::json,  id::text, VARIADIC schema::json)
+// jsonschema_validates(doc::jsonb, id::text, VARIADIC schema::jsonb)
+// jsonschema_validates(doc::json,  id::text, VARIADIC schema::jsonb)
+// jsonschema_validates(doc::jsonb, id::text, VARIADIC schema::json)
+
+#[pg_extern(immutable, strict, name = "jsonschema_validates")]
+fn json_schema_id_validates_json(
+    json: pgrx::Json,
+    id: &str,
+    schemas: pgrx::VariadicArray<pgrx::Json>,
+) -> bool {
     let schemas = convert_jsons(schemas);
     validate(id, &schemas, json.0)
 }
 
-#[pg_extern(immutable, strict, name = "json_is_valid")]
-fn json_is_valid_first(json: pgrx::Json, schemas: pgrx::VariadicArray<pgrx::Json>) -> bool {
-    let schemas = convert_jsons(schemas);
-    validate(id_for(&schemas), &schemas, json.0)
-}
-
-#[pg_extern(immutable, strict, name = "json_is_valid")]
-fn jsonb_is_valid(json: pgrx::Json, id: &str, schemas: pgrx::VariadicArray<pgrx::JsonB>) -> bool {
+#[pg_extern(immutable, strict, name = "jsonschema_validates")]
+fn jsonb_schema_id_validates_jsonb(
+    json: pgrx::JsonB,
+    id: &str,
+    schemas: pgrx::VariadicArray<pgrx::JsonB>,
+) -> bool {
     let schemas = convert_jsonbs(schemas);
     validate(id, &schemas, json.0)
 }
 
-#[pg_extern(immutable, strict, name = "json_is_valid")]
-fn jsonb_is_valid_first(json: pgrx::Json, schemas: pgrx::VariadicArray<pgrx::JsonB>) -> bool {
+#[pg_extern(immutable, strict, name = "jsonschema_validates")]
+fn json_schema_id_validates_jsonb(
+    json: pgrx::Json,
+    id: &str,
+    schemas: pgrx::VariadicArray<pgrx::JsonB>,
+) -> bool {
     let schemas = convert_jsonbs(schemas);
-    validate(id_for(&schemas), &schemas, json.0)
+    validate(id, &schemas, json.0)
+}
+
+#[pg_extern(immutable, strict, name = "jsonschema_validates")]
+fn jsonb_schema_id_validates_json(
+    json: pgrx::JsonB,
+    id: &str,
+    schemas: pgrx::VariadicArray<pgrx::Json>,
+) -> bool {
+    let schemas = convert_jsons(schemas);
+    validate(id, &schemas, json.0)
 }
 
 /// Converts schemas from `pgrx::Array<pgrx::Json>` and returns the result.
@@ -93,12 +150,10 @@ fn convert_jsonbs(schemas: pgrx::VariadicArray<pgrx::JsonB>) -> Vec<Value> {
         .collect::<Vec<_>>()
 }
 
-fn id_for(schemas: &[Value]) -> &str {
-    for s in schemas.iter() {
-        if let Value::String(s) = &s["$id"] {
-            return s;
-        };
-    }
+fn id_for(s: &Value) -> &str {
+    if let Value::String(s) = &s["$id"] {
+        return s;
+    };
     "schema.json"
 }
 
