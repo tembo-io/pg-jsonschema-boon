@@ -231,7 +231,24 @@ mod tests {
     use super::*;
     use pgrx::{Json, JsonB};
     use serde_json::json;
-    // use std::error::Error;
+    use std::{env, error::Error, fs::File, path::Path};
+
+    #[pg_test]
+    fn test_jsonschema_is_valid() -> Result<(), Box<dyn Error>> {
+        let root_dir = env::var("CARGO_MANIFEST_DIR").unwrap();
+        let root = Path::new(&root_dir);
+        let address = serde_json::from_reader(File::open(
+            root.join("schemas").join("address.schema.json"),
+        )?)?;
+        let user = serde_json::from_reader(File::open(
+            root.join("schemas").join("user-profile.schema.json"),
+        )?)?;
+        let id = "https://example.com/user-profile.schema.json";
+
+        assert!(compiles(id, &[address, user]));
+
+        Ok(())
+    }
 
     #[pg_test]
     fn test_id_for() {
@@ -284,8 +301,8 @@ mod tests {
         //     json!({"type": "nonesuch"}),
         //     json!({"x": "y"})
         // );
-        // let result = Spi::get_one(&query)?;
-        // assert_eq!(result, Some(false));
+        // let result = Spi::run(&query);
+        // assert_eq!(result, Err(pgrx::spi::SpiError::InvalidPosition));
 
         // NULL instance.
         let query = format!("SELECT jsonb_matches_schema(NULL, '{}')", json!({"x": "y"}));
