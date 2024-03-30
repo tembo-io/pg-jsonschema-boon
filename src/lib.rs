@@ -204,12 +204,44 @@ fn jsonb_schema_id_validates_json(
     }
 }
 
+/// Supported draft versions
+#[non_exhaustive]
+#[derive(PostgresGucEnum, Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub enum Draft {
+    /// Draft for `http://json-schema.org/draft-04/schema`
+    V4,
+    /// Draft for `http://json-schema.org/draft-06/schema`
+    V6,
+    /// Draft for `http://json-schema.org/draft-07/schema`
+    V7,
+    /// Draft for `https://json-schema.org/draft/2019-09/schema`
+    V2019_09,
+    /// Draft for `https://json-schema.org/draft/2020-12/schema`
+    V2020_12,
+}
+
+#[allow(clippy::from_over_into)]
+impl Into<boon::Draft> for Draft {
+    fn into(self) -> boon::Draft {
+        match self {
+            Draft::V4 => boon::Draft::V4,
+            Draft::V6 => boon::Draft::V6,
+            Draft::V7 => boon::Draft::V7,
+            Draft::V2019_09 => boon::Draft::V2019_09,
+            Draft::V2020_12 => boon::Draft::V2020_12,
+        }
+    }
+}
+
+static GUC: pgrx::GucSetting<Draft> = pgrx::GucSetting::<Draft>::new(Draft::V2020_12);
+
 /// new_compiler creates and returns a new `boon::Compiler` loaded with
 /// `schemas`. Each schema in `schemas` is named for its `$id` field or, if it
 /// has none, `id` is used for the first schema, and `"{id}{i}"` for
 /// subsequent schemas.
 fn new_compiler(id: &str, schemas: &[Value]) -> Result<Compiler, CompileError> {
     let mut compiler = Compiler::new();
+    compiler.set_default_draft(GUC.get().into());
 
     for (i, s) in schemas.iter().enumerate() {
         let sid = if let Value::String(s) = &s["$id"] {
