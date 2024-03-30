@@ -211,10 +211,6 @@ fn jsonb_schema_id_validates_json(
 fn new_compiler(id: &str, schemas: &[Value]) -> Result<Compiler, CompileError> {
     let mut compiler = Compiler::new();
 
-    if schemas.is_empty() {
-        error!("No schemas passed");
-    }
-
     for (i, s) in schemas.iter().enumerate() {
         let sid = if let Value::String(s) = &s["$id"] {
             s.to_string()
@@ -303,6 +299,45 @@ mod tests {
     }
 
     #[pg_test]
+    fn test_new_compiler() -> Result<(), Box<dyn Error>> {
+        let address = load_json("address.schema.json");
+        let user = load_json("user-profile.schema.json");
+        let id = String::from("https://example.com/user-profile.schema.json");
+        let c = new_compiler(&id, &[address.clone(), user.clone()]);
+        assert!(c.is_ok());
+
+        // Make sure it compiles user and address.
+        let mut c = c.unwrap();
+        let mut schemas = Schemas::new();
+        c.compile(&id, &mut schemas)?;
+
+        let mut schemas = Schemas::new();
+        assert!(c
+            .compile("https://example.com/address.schema.json", &mut schemas)
+            .is_ok());
+
+        // Try some without IDs
+        let id = String::from("file:test.json");
+        let c = new_compiler(&id, &[json!({"type": "object"}), json!({"type": "array"})]);
+        assert!(c.is_ok());
+
+        // It should have used the id.
+        let mut c = c.unwrap();
+        let mut schemas = Schemas::new();
+        assert!(c.compile(&id, &mut schemas).is_ok());
+
+        // And appended "1" to the second schema.
+        let mut schemas = Schemas::new();
+        assert!(c.compile("file:test.json1", &mut schemas).is_ok());
+
+        // But no more.
+        let mut schemas = Schemas::new();
+        assert!(c.compile("file:test.json2", &mut schemas).is_err());
+
+        Ok(())
+    }
+
+    #[pg_test]
     fn test_id_for() {
         assert_eq!(id_for!(json!({"$id": "foo"})), "foo");
         assert_eq!(id_for!(json!({"$id": "bar"})), "bar");
@@ -310,14 +345,6 @@ mod tests {
         assert_eq!(id_for!(json!({"id": "yo"})), "schema.json");
         assert_eq!(id_for!(json!(null)), "schema.json");
     }
-
-    // #[pg_test]
-    // fn test_values_for() {
-    //     let v = vec![Json(json!("hi")), Json(json!({"x": "y"}))];
-    //     let datum = v.into_datum();
-    //     let varray = VariadicArray::<Json>::from_datum(datum, false);
-    //     assert_eq!(values_for!(&varray), v);
-    // }
 
     #[pg_test]
     fn test_jsonb_matches_schema() {
@@ -353,6 +380,7 @@ mod tests {
         //     json!({"type": "nonesuch"}),
         //     json!({"x": "y"})
         // );
+        // assert!(Spi::run(&query).is_err());
         // let result = Spi::run(&query);
         // assert_eq!(result, Err(pgrx::spi::SpiError::InvalidPosition));
 
