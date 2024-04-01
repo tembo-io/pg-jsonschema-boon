@@ -16,6 +16,19 @@ macro_rules! id_for {
     };
 }
 
+// run_compiles runs compiles for the schema verification functions.
+macro_rules! run_compiles {
+    ($x:expr, $y:expr) => {
+        match compiles($x, $y) {
+            Err(e) => {
+                info!("{e}");
+                false
+            }
+            Ok(()) => true,
+        }
+    };
+}
+
 // Converts schemas from `pgrx::Array<_>` to `Vec<serde_json::Value>` and
 // returns the result. Used by the variadic functions.
 macro_rules! values_for {
@@ -54,20 +67,14 @@ fn jsonb_matches_schema(schema: pgrx::Json, instance: pgrx::JsonB) -> bool {
 #[pg_extern(immutable, strict, name = "jsonschema_is_valid")]
 fn json_schema_is_valid(schema: pgrx::Json) -> bool {
     let schemas = [schema.0];
-    match compiles(id_for!(&schemas[0]), &schemas) {
-        Err(e) => error!("{e}"),
-        Ok(ok) => ok,
-    }
+    run_compiles!(id_for!(&schemas[0]), &schemas)
 }
 
 /// jsonb_schema_is_valid validates `schema`.
 #[pg_extern(immutable, strict, name = "jsonschema_is_valid")]
 fn jsonb_schema_is_valid(schema: pgrx::JsonB) -> bool {
     let schemas = [schema.0];
-    match compiles(id_for!(&schemas[0]), &schemas) {
-        Err(e) => error!("{e}"),
-        Ok(ok) => ok,
-    }
+    run_compiles!(id_for!(&schemas[0]), &schemas)
 }
 
 /// json_schema_id_is_valid validates the schema with the `$id` `id` from the
@@ -75,10 +82,7 @@ fn jsonb_schema_is_valid(schema: pgrx::JsonB) -> bool {
 #[pg_extern(immutable, strict, name = "jsonschema_is_valid")]
 fn json_schema_id_is_valid(id: &str, schemas: pgrx::VariadicArray<pgrx::Json>) -> bool {
     let schemas = values_for!(schemas);
-    match compiles(id, &schemas) {
-        Err(e) => error!("{e}"),
-        Ok(ok) => ok,
-    }
+    run_compiles!(id, &schemas)
 }
 
 /// jsonb_schema_id_is_valid validates the schema with the `$id` `id` from the
@@ -86,10 +90,7 @@ fn json_schema_id_is_valid(id: &str, schemas: pgrx::VariadicArray<pgrx::Json>) -
 #[pg_extern(immutable, strict, name = "jsonschema_is_valid")]
 fn jsonb_schema_id_is_valid(id: &str, schemas: pgrx::VariadicArray<pgrx::JsonB>) -> bool {
     let schemas = values_for!(schemas);
-    match compiles(id, &schemas) {
-        Err(e) => error!("{e}"),
-        Ok(ok) => ok,
-    }
+    run_compiles!(id, &schemas)
 }
 
 // Document validation functions.
@@ -249,6 +250,9 @@ pub fn init_guc() {
     );
 }
 
+// Executes when Postgres loads the extension shared object library, which it
+// does the first time it's used (and in the session where its loaded by
+// `CREATE EXTENSION`).
 #[pg_guard]
 pub extern "C" fn _PG_init() {
     init_guc();
@@ -279,16 +283,22 @@ fn new_compiler(id: &str, schemas: &[Value]) -> Result<Compiler, CompileError> {
     Ok(compiler)
 }
 
-/// compiles compiles the schema named `id` in `schemas`, returning `true` on
-/// success and `false` on failure.
-fn compiles(id: &str, schemas: &[Value]) -> Result<bool, CompileError> {
-    if let Ok(mut c) = new_compiler(id, schemas) {
-        let mut schemas = Schemas::new();
-        c.compile(id, &mut schemas)?;
-        return Ok(true);
-    }
+/// compiles compiles the schema named `id` in `schemas`, returning `Ok(())`
+/// on success and an error on failure.
+fn compiles(id: &str, schemas: &[Value]) -> Result<(), CompileError> {
+    let mut c = new_compiler(id, schemas)?;
+    let mut schemas = Schemas::new();
+    c.compile(id, &mut schemas)?;
 
-    Ok(false)
+    Ok(())
+}
+
+// Mock info!() during tests to just go to STDOUT. Would be nice to capture it
+// somehow, but the lack of reference to a std::io::Write in pgrx's info!()
+// makes it tricky.
+#[cfg(test)]
+macro_rules! info {
+    ($($arg:tt)*) => {{ println!($($arg)*)}};
 }
 
 /// validate validates `instance` against schema `id` in `schemas`.
@@ -320,18 +330,31 @@ mod tests {
     use serde_json::json;
     use std::{env, error::Error, fs::File, path::Path};
 
+    // Enum used to record handling expected errors.
     #[derive(Debug, Eq, PartialEq)]
     enum ErrorCaught {
         True,
         False,
     }
+
+    // Load the named JSON file into a serde_json::Value.
     fn load_json(name: &str) -> Value {
         let root_dir = env::var("CARGO_MANIFEST_DIR").unwrap();
         let root = Path::new(&root_dir);
         serde_json::from_reader(File::open(root.join("schemas").join(name)).unwrap()).unwrap()
     }
 
-    #[pg_test]
+    // Make sure our Draft enum converts properly into boon's.
+    #[test]
+    fn test_draft() {
+        assert_eq!(boon::Draft::V4, Draft::V4.into());
+        assert_eq!(boon::Draft::V6, Draft::V6.into());
+        assert_eq!(boon::Draft::V7, Draft::V7.into());
+        assert_eq!(boon::Draft::V2019_09, Draft::V2019_09.into());
+        assert_eq!(boon::Draft::V2020_12, Draft::V2020_12.into());
+    }
+
+    #[test]
     fn test_compiles() -> Result<(), Box<dyn Error>> {
         let address = load_json("address.schema.json");
         let user = load_json("user-profile.schema.json");
@@ -340,22 +363,27 @@ mod tests {
             "https://example.com/address.schema.json",
             &[address.clone(), user.clone()]
         )
-        .unwrap());
+        .is_ok());
         assert!(compiles(
             "https://example.com/user-profile.schema.json",
             &[address.clone(), user.clone()]
         )
-        .unwrap());
+        .is_ok());
+
+        // An unknown schema should fail.
         assert!(compiles(
             "https://example.com/nonesuch.schema.json",
             &[address.clone(), user.clone()]
         )
         .is_err());
 
+        // An invalid schema should fail.
+        assert!(compiles("fail.json", &[json!({"$schema": "not a schema"})]).is_err());
+
         Ok(())
     }
 
-    #[pg_test]
+    #[test]
     fn test_new_compiler() -> Result<(), Box<dyn Error>> {
         let address = load_json("address.schema.json");
         let user = load_json("user-profile.schema.json");
@@ -391,16 +419,99 @@ mod tests {
         let mut schemas = Schemas::new();
         assert!(c.compile("file:test.json2", &mut schemas).is_err());
 
+        // Test an invalid draft.
+        assert!(new_compiler(&id, &[json!({"$schema": "lol"})]).is_err());
+
         Ok(())
     }
 
-    #[pg_test]
+    #[test]
     fn test_id_for() {
         assert_eq!(id_for!(json!({"$id": "foo"})), "foo");
         assert_eq!(id_for!(json!({"$id": "bar"})), "bar");
         assert_eq!(id_for!(json!({"$id": "yo", "id": "hi"})), "yo");
         assert_eq!(id_for!(json!({"id": "yo"})), "file:///schema.json");
         assert_eq!(id_for!(json!(null)), "file:///schema.json");
+    }
+
+    #[test]
+    fn test_validate() -> Result<(), Box<dyn Error>> {
+        let address_schema = load_json("address.schema.json");
+        let user_schema = load_json("user-profile.schema.json");
+        let address = json!({
+          "postOfficeBox": "123",
+          "streetAddress": "456 Main St",
+          "locality": "Cityville",
+          "region": "State",
+          "postalCode": "12345",
+          "countryName": "Country"
+        });
+        let user = json!({
+          "username": "user123",
+          "email": "user@example.com",
+          "fullName": "John Doe",
+          "age": 30,
+          "location": "Cityville",
+          "interests": ["Travel", "Technology"]
+        });
+
+        assert!(validate(
+            "https://example.com/address.schema.json",
+            &[address_schema.clone(), user_schema.clone()],
+            address.clone(),
+        )
+        .unwrap());
+
+        assert!(validate(
+            "https://example.com/user-profile.schema.json",
+            &[address_schema.clone(), user_schema.clone()],
+            user.clone(),
+        )
+        .unwrap());
+
+        // Test a compile failure.
+        assert!(validate(
+            "file:test.json",
+            &[json!({"$id": "nonesuch"})],
+            user.clone(),
+        )
+        .is_err());
+
+        // Test an unknown schema name.
+        assert!(validate(
+            "file:unknown.json",
+            &[address_schema.clone(), user_schema.clone()],
+            user.clone(),
+        )
+        .is_err());
+
+        // Test an invalid user.
+        assert!(!validate(
+            "https://example.com/user-profile.schema.json",
+            &[address_schema.clone(), user_schema.clone()],
+            json!({
+              "username": "user123",
+              "location": "Cityville",
+            })
+        )
+        .unwrap());
+
+        // Test aa user with an invalid address.
+        assert!(!validate(
+            "https://example.com/address.schema.json",
+            &[address_schema.clone(), user_schema.clone()],
+            json!({
+                "username": "user123",
+                "email": "user@example.com",
+                "address": {
+                  "locality": "Cityville",
+                  "countryName": "Country"
+                },
+            })
+        )
+        .unwrap());
+
+        Ok(())
     }
 
     #[pg_test]
