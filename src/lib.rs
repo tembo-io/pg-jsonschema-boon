@@ -235,6 +235,25 @@ impl Into<boon::Draft> for Draft {
 
 static GUC: pgrx::GucSetting<Draft> = pgrx::GucSetting::<Draft>::new(Draft::V2020_12);
 
+// initialize GUCs
+pub fn init_guc() {
+    // Register the GUC jsonschema.default_draft, with values defined by the
+    // Draft enum.
+    pgrx::GucRegistry::define_enum_guc(
+        "jsonschema.default_draft",
+        "Default JSON Schema draft",
+        r#"JSON Schema draft to use for schemas that don't define the draft in their "$schema" property."#,
+        &GUC,
+        pgrx::GucContext::Userset,
+        pgrx::GucFlags::default(),
+    );
+}
+
+#[pg_guard]
+pub extern "C" fn _PG_init() {
+    init_guc();
+}
+
 /// new_compiler creates and returns a new `boon::Compiler` loaded with
 /// `schemas`. Each schema in `schemas` is named for its `$id` field or, if it
 /// has none, `id` is used for the first schema, and `"{id}{i}"` for
@@ -428,6 +447,34 @@ mod tests {
         );
         let result: Option<bool> = Spi::get_one(&query)?;
         assert_eq!(result, None);
+
+        Ok(())
+    }
+
+    #[pg_test]
+    fn test_draft_schema_guc() -> spi::Result<()> {
+        let draft = Spi::get_one("SELECT current_setting('jsonschema.default_draft')")?;
+        assert_eq!(Some("V2020_12"), draft);
+        assert_eq!(Draft::V2020_12, GUC.get());
+
+        Spi::run("SELECT set_config('jsonschema.default_draft', 'V6', false)")?;
+        let draft = Spi::get_one("SELECT current_setting('jsonschema.default_draft')")?;
+        assert_eq!(Some("V6"), draft);
+        assert_eq!(Draft::V6, GUC.get());
+
+        Spi::run("SET jsonschema.default_draft TO 'V4'")?;
+        let draft = Spi::get_one("SHOW jsonschema.default_draft")?;
+        assert_eq!(Some("V4"), draft);
+        assert_eq!(Draft::V4, GUC.get());
+
+        // Make sure it fails for an invalid setting.
+        _ = PgTryBuilder::new(|| Spi::run("SET jsonschema.default_draft TO 'NONESUCH'"))
+            .catch_when(PgSqlErrorCode::ERRCODE_INVALID_PARAMETER_VALUE, |_| Ok(()))
+            .catch_others(|e| panic!("{e:?}"))
+            .execute();
+
+        // GUC should be unchanged.
+        assert_eq!(Draft::V4, GUC.get());
 
         Ok(())
     }
