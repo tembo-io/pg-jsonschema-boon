@@ -29,31 +29,22 @@ macro_rules! run_compiles {
     };
 }
 
+// run_validate runs validate for the verification functions.
+macro_rules! run_validate {
+    ($x:expr, $y:expr, $z:expr) => {
+        match validate($x, $y, $z) {
+            Err(e) => error!("{e}"),
+            Ok(ok) => ok,
+        }
+    };
+}
+
 // Converts schemas from `pgrx::Array<_>` to `Vec<serde_json::Value>` and
 // returns the result. Used by the variadic functions.
 macro_rules! values_for {
     ($x:expr) => {
         $x.iter_deny_null().map(|x| x.0).collect::<Vec<_>>()
     };
-}
-
-// pg_jsonschema-compatible functions.
-#[pg_extern(immutable, strict)]
-fn json_matches_schema(schema: pgrx::Json, instance: pgrx::Json) -> bool {
-    let schemas = [schema.0];
-    match validate(id_for!(&schemas[0]), &schemas, instance.0) {
-        Err(e) => error!("{e}"),
-        Ok(ok) => ok,
-    }
-}
-
-#[pg_extern(immutable, strict)]
-fn jsonb_matches_schema(schema: pgrx::Json, instance: pgrx::JsonB) -> bool {
-    let schemas = [schema.0];
-    match validate(id_for!(&schemas[0]), &schemas, instance.0) {
-        Err(e) => error!("{e}"),
-        Ok(ok) => ok,
-    }
 }
 
 // Schema validation functions.
@@ -104,40 +95,28 @@ fn jsonb_schema_id_is_valid(id: &str, schemas: pgrx::VariadicArray<pgrx::JsonB>)
 #[pg_extern(immutable, strict, name = "jsonschema_validates")]
 fn json_schema_validates_json(json: pgrx::Json, schema: pgrx::Json) -> bool {
     let schemas = [schema.0];
-    match validate(id_for!(&schemas[0]), &schemas, json.0) {
-        Err(e) => error!("{e}"),
-        Ok(ok) => ok,
-    }
+    run_validate!(id_for!(&schemas[0]), &schemas, json.0)
 }
 
 /// jsonb_schema_validates_jsonb validates `json` against `schema`.
 #[pg_extern(immutable, strict, name = "jsonschema_validates")]
 fn jsonb_schema_validates_jsonb(json: pgrx::JsonB, schema: pgrx::JsonB) -> bool {
     let schemas = [schema.0];
-    match validate(id_for!(&schemas[0]), &schemas, json.0) {
-        Err(e) => error!("{e}"),
-        Ok(ok) => ok,
-    }
+    run_validate!(id_for!(&schemas[0]), &schemas, json.0)
 }
 
 /// json_schema_validates_jsonb validates `json` against `schema`.
 #[pg_extern(immutable, strict, name = "jsonschema_validates")]
 fn json_schema_validates_jsonb(json: pgrx::Json, schema: pgrx::JsonB) -> bool {
     let schemas = [schema.0];
-    match validate(id_for!(&schemas[0]), &schemas, json.0) {
-        Err(e) => error!("{e}"),
-        Ok(ok) => ok,
-    }
+    run_validate!(id_for!(&schemas[0]), &schemas, json.0)
 }
 
 /// jsonb_schema_validates_json validates `json` against `schema`.
 #[pg_extern(immutable, strict, name = "jsonschema_validates")]
 fn jsonb_schema_validates_json(json: pgrx::JsonB, schema: pgrx::Json) -> bool {
     let schemas = [schema.0];
-    match validate(id_for!(&schemas[0]), &schemas, json.0) {
-        Err(e) => error!("{e}"),
-        Ok(ok) => ok,
-    }
+    run_validate!(id_for!(&schemas[0]), &schemas, json.0)
 }
 
 // jsonschema_validates(doc::json,  id::text, VARIADIC schema::json)
@@ -154,10 +133,7 @@ fn json_schema_id_validates_json(
     schemas: pgrx::VariadicArray<pgrx::Json>,
 ) -> bool {
     let schemas = values_for!(schemas);
-    match validate(id, &schemas, json.0) {
-        Err(e) => error!("{e}"),
-        Ok(ok) => ok,
-    }
+    run_validate!(id, &schemas, json.0)
 }
 
 /// jsonb_schema_id_validates_jsonb validates `json` against the schema with
@@ -169,10 +145,7 @@ fn jsonb_schema_id_validates_jsonb(
     schemas: pgrx::VariadicArray<pgrx::JsonB>,
 ) -> bool {
     let schemas = values_for!(schemas);
-    match validate(id, &schemas, json.0) {
-        Err(e) => error!("{e}"),
-        Ok(ok) => ok,
-    }
+    run_validate!(id, &schemas, json.0)
 }
 
 /// json_schema_id_validates_jsonb validates `json` against the schema with
@@ -184,10 +157,7 @@ fn json_schema_id_validates_jsonb(
     schemas: pgrx::VariadicArray<pgrx::JsonB>,
 ) -> bool {
     let schemas = values_for!(schemas);
-    match validate(id, &schemas, json.0) {
-        Err(e) => error!("{e}"),
-        Ok(ok) => ok,
-    }
+    run_validate!(id, &schemas, json.0)
 }
 
 /// jsonb_schema_id_validates_json validates `json` against the schema with
@@ -199,16 +169,26 @@ fn jsonb_schema_id_validates_json(
     schemas: pgrx::VariadicArray<pgrx::Json>,
 ) -> bool {
     let schemas = values_for!(schemas);
-    match validate(id, &schemas, json.0) {
-        Err(e) => error!("{e}"),
-        Ok(ok) => ok,
-    }
+    run_validate!(id, &schemas, json.0)
 }
 
-/// Supported draft versions
+// pg_jsonschema-compatible functions.
+#[pg_extern(immutable, strict)]
+fn json_matches_schema(schema: pgrx::Json, instance: pgrx::Json) -> bool {
+    let schemas = [schema.0];
+    run_validate!(id_for!(&schemas[0]), &schemas, instance.0)
+}
+
+#[pg_extern(immutable, strict)]
+fn jsonb_matches_schema(schema: pgrx::Json, instance: pgrx::JsonB) -> bool {
+    let schemas = [schema.0];
+    run_validate!(id_for!(&schemas[0]), &schemas, instance.0)
+}
+
+/// Supported draft versions.
 #[non_exhaustive]
 #[derive(PostgresGucEnum, Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub enum Draft {
+enum Draft {
     /// Draft for `http://json-schema.org/draft-04/schema`
     V4,
     /// Draft for `http://json-schema.org/draft-06/schema`
@@ -237,7 +217,7 @@ impl Into<boon::Draft> for Draft {
 static GUC: pgrx::GucSetting<Draft> = pgrx::GucSetting::<Draft>::new(Draft::V2020_12);
 
 // initialize GUCs
-pub fn init_guc() {
+fn init_guc() {
     // Register the GUC jsonschema.default_draft, with values defined by the
     // Draft enum.
     pgrx::GucRegistry::define_enum_guc(
@@ -254,7 +234,7 @@ pub fn init_guc() {
 // does the first time it's used (and in the session where its loaded by
 // `CREATE EXTENSION`).
 #[pg_guard]
-pub extern "C" fn _PG_init() {
+extern "C" fn _PG_init() {
     init_guc();
 }
 
@@ -302,7 +282,7 @@ macro_rules! info {
 }
 
 /// validate validates `instance` against schema `id` in `schemas`.
-pub fn validate(id: &str, schemas: &[Value], instance: Value) -> Result<bool, CompileError> {
+fn validate(id: &str, schemas: &[Value], instance: Value) -> Result<bool, CompileError> {
     match new_compiler(id, schemas) {
         Err(e) => Err(e),
         Ok(mut c) => {
@@ -523,60 +503,139 @@ mod tests {
     }
 
     #[pg_test]
-    fn test_jsonb_matches_schema_sql() -> spi::Result<()> {
-        // Valid.
-        let query = format!(
-            "SELECT jsonb_matches_schema('{}', '{}')",
-            json!({"type": "object"}),
-            json!({"x": "y"})
-        );
-        let result = Spi::get_one(&query)?;
-        assert_eq!(result, Some(true));
+    fn test_json_matches_schema_sql() -> spi::Result<()> {
+        // pg_jsonschema-compatible function.
+        for func in ["jsonb_matches_schema", "json_matches_schema"].iter() {
+            // Valid.
+            let query = format!(
+                "SELECT {}('{}', '{}')",
+                func,
+                json!({"type": "object"}),
+                json!({"x": "y"})
+            );
+            let result = Spi::get_one(&query)?;
+            assert_eq!(result, Some(true));
 
-        // Invalid json.
-        let query = format!(
-            "SELECT jsonb_matches_schema('{}', '{}')",
-            json!({"type": "object"}),
-            json!(["x", "y"]),
-        );
-        let result = Spi::get_one(&query)?;
-        assert_eq!(result, Some(false));
+            // Invalid json.
+            let query = format!(
+                "SELECT {}('{}', '{}')",
+                func,
+                json!({"type": "object"}),
+                json!(["x", "y"]),
+            );
+            let result = Spi::get_one(&query)?;
+            assert_eq!(result, Some(false));
 
-        // Invalid schema.
-        let query = format!(
-            "SELECT jsonb_matches_schema('{}', '{}')",
-            json!({"type": "nonesuch"}),
-            json!({"x": "y"})
-        );
-        let res: Result<ErrorCaught, SpiError> = PgTryBuilder::new(|| {
-            Spi::run(&query)?;
-            Ok(ErrorCaught::False)
-        })
-        .catch_when(PgSqlErrorCode::ERRCODE_INTERNAL_ERROR, |e| {
-            if let PostgresError(e) = e {
-                assert_eq!(
-                    "file:///schema.json is not valid against metaschema",
-                    e.message(),
+            // Invalid schema.
+            let query = format!(
+                "SELECT {}('{}', '{}')",
+                func,
+                json!({"type": "nonesuch"}),
+                json!({"x": "y"})
+            );
+            let res: Result<ErrorCaught, SpiError> = PgTryBuilder::new(|| {
+                Spi::run(&query)?;
+                Ok(ErrorCaught::False)
+            })
+            .catch_when(PgSqlErrorCode::ERRCODE_INTERNAL_ERROR, |e| {
+                if let PostgresError(e) = e {
+                    assert_eq!(
+                        "file:///schema.json is not valid against metaschema",
+                        e.message(),
+                    );
+                }
+                Ok(ErrorCaught::True)
+            })
+            .catch_others(|e| e.rethrow())
+            .execute();
+            assert_eq!(res, Ok(ErrorCaught::True));
+
+            // NULL instance.
+            let query = format!("SELECT {}(NULL, '{}')", func, json!({"x": "y"}));
+            let result: Option<bool> = Spi::get_one(&query)?;
+            assert_eq!(result, None);
+
+            // NULL schema.
+            let query = format!("SELECT {}('{}', NULL)", func, json!({"type": "object"}));
+            let result: Option<bool> = Spi::get_one(&query)?;
+            assert_eq!(result, None);
+        }
+
+        Ok(())
+    }
+
+    #[pg_test]
+    fn test_jsonschema_validates_one() -> spi::Result<()> {
+        // pg_jsonschema-compatible function.
+        let types = ["json", "jsonb"];
+        for schema_type in types {
+            for obj_type in types {
+                // Valid.
+                let query = format!(
+                    "SELECT jsonschema_validates('{}'::{}, '{}'::{})",
+                    json!({"x": "y"}),
+                    obj_type,
+                    json!({"type": "object"}),
+                    schema_type,
                 );
+                let result = Spi::get_one(&query)?;
+                assert_eq!(result, Some(true));
+
+                // Invalid json.
+                let query = format!(
+                    "SELECT jsonschema_validates('{}'::{}, '{}'::{})",
+                    json!(["x", "y"]),
+                    obj_type,
+                    json!({"type": "object"}),
+                    schema_type,
+                );
+                let result = Spi::get_one(&query)?;
+                assert_eq!(result, Some(false));
+
+                // Invalid schema.
+                let query = format!(
+                    "SELECT jsonschema_validates('{}'::{}, '{}'::{})",
+                    json!({"x": "y"}),
+                    obj_type,
+                    json!({"type": "nonesuch"}),
+                    schema_type,
+                );
+                let res: Result<ErrorCaught, SpiError> = PgTryBuilder::new(|| {
+                    Spi::run(&query)?;
+                    Ok(ErrorCaught::False)
+                })
+                .catch_when(PgSqlErrorCode::ERRCODE_INTERNAL_ERROR, |e| {
+                    if let PostgresError(e) = e {
+                        assert_eq!(
+                            "file:///schema.json is not valid against metaschema",
+                            e.message(),
+                        );
+                    }
+                    Ok(ErrorCaught::True)
+                })
+                .catch_others(|e| e.rethrow())
+                .execute();
+                assert_eq!(res, Ok(ErrorCaught::True));
+
+                // // NULL schema.
+                let query = format!(
+                    "SELECT jsonschema_validates(NULL, '{}'::{})",
+                    json!({"x": "y"}),
+                    schema_type,
+                );
+                let result: Option<bool> = Spi::get_one(&query)?;
+                assert_eq!(result, None);
+
+                // NULL instance.
+                let query = format!(
+                    "SELECT jsonschema_validates('{}'::{}, NULL)",
+                    json!({"type": "object"}),
+                    obj_type
+                );
+                let result: Option<bool> = Spi::get_one(&query)?;
+                assert_eq!(result, None);
             }
-            Ok(ErrorCaught::True)
-        })
-        .catch_others(|e| e.rethrow())
-        .execute();
-        assert_eq!(res, Ok(ErrorCaught::True));
-
-        // NULL instance.
-        let query = format!("SELECT jsonb_matches_schema(NULL, '{}')", json!({"x": "y"}));
-        let result: Option<bool> = Spi::get_one(&query)?;
-        assert_eq!(result, None);
-
-        // NULL schema.
-        let query = format!(
-            "SELECT jsonb_matches_schema('{}', NULL)",
-            json!({"type": "object"})
-        );
-        let result: Option<bool> = Spi::get_one(&query)?;
-        assert_eq!(result, None);
+        }
 
         Ok(())
     }
@@ -619,7 +678,7 @@ mod tests {
 /// This module is required by `cargo pgrx test` invocations.
 /// It must be visible at the root of your extension crate.
 #[cfg(test)]
-pub mod pg_test {
+mod pg_test {
     pub fn setup(_options: Vec<&str>) {
         // perform one-off initialization when the pg_test framework starts
     }
