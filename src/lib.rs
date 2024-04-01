@@ -4,14 +4,14 @@ use serde_json::Value;
 
 pgrx::pg_module_magic!();
 
-// id_for returns the schema `$id` for $x, falling back on "schema.json" if $x
+// id_for returns the schema `$id` for $x, falling back on "file:///schema.json" if $x
 // has no `$id`.
 macro_rules! id_for {
     ($x:expr) => {
         if let Value::String(s) = &$x["$id"] {
             s
         } else {
-            "schema.json"
+            "file:///schema.json"
         }
     };
 }
@@ -315,10 +315,16 @@ pub fn validate(id: &str, schemas: &[Value], instance: Value) -> Result<bool, Co
 #[pg_schema]
 mod tests {
     use super::*;
-    use pgrx::{Json, JsonB};
+    use pgrx::pg_sys::panic::CaughtError::PostgresError;
+    use pgrx::{spi::SpiError, Json, JsonB};
     use serde_json::json;
     use std::{env, error::Error, fs::File, path::Path};
 
+    #[derive(Debug, Eq, PartialEq)]
+    enum ErrorCaught {
+        True,
+        False,
+    }
     fn load_json(name: &str) -> Value {
         let root_dir = env::var("CARGO_MANIFEST_DIR").unwrap();
         let root = Path::new(&root_dir);
@@ -393,8 +399,8 @@ mod tests {
         assert_eq!(id_for!(json!({"$id": "foo"})), "foo");
         assert_eq!(id_for!(json!({"$id": "bar"})), "bar");
         assert_eq!(id_for!(json!({"$id": "yo", "id": "hi"})), "yo");
-        assert_eq!(id_for!(json!({"id": "yo"})), "schema.json");
-        assert_eq!(id_for!(json!(null)), "schema.json");
+        assert_eq!(id_for!(json!({"id": "yo"})), "file:///schema.json");
+        assert_eq!(id_for!(json!(null)), "file:///schema.json");
     }
 
     #[pg_test]
@@ -426,14 +432,27 @@ mod tests {
         assert_eq!(result, Some(false));
 
         // Invalid schema.
-        // let query = format!(
-        //     "SELECT jsonb_matches_schema('{}', '{}')",
-        //     json!({"type": "nonesuch"}),
-        //     json!({"x": "y"})
-        // );
-        // assert!(Spi::run(&query).is_err());
-        // let result = Spi::run(&query);
-        // assert_eq!(result, Err(pgrx::spi::SpiError::InvalidPosition));
+        let query = format!(
+            "SELECT jsonb_matches_schema('{}', '{}')",
+            json!({"type": "nonesuch"}),
+            json!({"x": "y"})
+        );
+        let res: Result<ErrorCaught, SpiError> = PgTryBuilder::new(|| {
+            Spi::run(&query)?;
+            Ok(ErrorCaught::False)
+        })
+        .catch_when(PgSqlErrorCode::ERRCODE_INTERNAL_ERROR, |e| {
+            if let PostgresError(e) = e {
+                assert_eq!(
+                    "file:///schema.json is not valid against metaschema",
+                    e.message(),
+                );
+            }
+            Ok(ErrorCaught::True)
+        })
+        .catch_others(|e| e.rethrow())
+        .execute();
+        assert_eq!(res, Ok(ErrorCaught::True));
 
         // NULL instance.
         let query = format!("SELECT jsonb_matches_schema(NULL, '{}')", json!({"x": "y"}));
@@ -468,10 +487,16 @@ mod tests {
         assert_eq!(Draft::V4, GUC.get());
 
         // Make sure it fails for an invalid setting.
-        _ = PgTryBuilder::new(|| Spi::run("SET jsonschema.default_draft TO 'NONESUCH'"))
-            .catch_when(PgSqlErrorCode::ERRCODE_INVALID_PARAMETER_VALUE, |_| Ok(()))
-            .catch_others(|e| panic!("{e:?}"))
-            .execute();
+        let res: Result<ErrorCaught, SpiError> = PgTryBuilder::new(|| {
+            Spi::run("SET jsonschema.default_draft TO 'NONESUCH'")?;
+            Ok(ErrorCaught::False)
+        })
+        .catch_when(PgSqlErrorCode::ERRCODE_INVALID_PARAMETER_VALUE, |_| {
+            Ok(ErrorCaught::True)
+        })
+        .catch_others(|e| e.rethrow())
+        .execute();
+        assert_eq!(res, Ok(ErrorCaught::True));
 
         // GUC should be unchanged.
         assert_eq!(Draft::V4, GUC.get());
