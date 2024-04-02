@@ -555,7 +555,6 @@ mod tests {
 
     #[pg_test]
     fn test_jsonschema_validates_one() -> spi::Result<()> {
-        // pg_jsonschema-compatible function.
         let types = ["json", "jsonb"];
         for schema_type in types {
             for obj_type in types {
@@ -606,7 +605,7 @@ mod tests {
                 .execute();
                 assert_eq!(res, Ok(ErrorCaught::True));
 
-                // // NULL schema.
+                // NULL schema.
                 let query = format!(
                     "SELECT jsonschema_validates(NULL, '{}'::{})",
                     json!({"x": "y"}),
@@ -620,6 +619,145 @@ mod tests {
                     "SELECT jsonschema_validates('{}'::{}, NULL)",
                     json!({"type": "object"}),
                     obj_type
+                );
+                let result: Option<bool> = Spi::get_one(&query)?;
+                assert_eq!(result, None);
+            }
+        }
+
+        Ok(())
+    }
+
+    #[pg_test]
+    fn test_jsonschema_validates_multi() -> spi::Result<()> {
+        let address_schema = load_json("address.schema.json");
+        let user_schema = load_json("user-profile.schema.json");
+        let address_id = address_schema.get("$id").unwrap().as_str().unwrap();
+        let user_id = user_schema.get("$id").unwrap().as_str().unwrap();
+        let address = json!({
+          "postOfficeBox": "123",
+          "streetAddress": "456 Main St",
+          "locality": "Big City",
+          "region": "State",
+          "postalCode": "12345",
+          "countryName": "Country"
+        });
+        let user = json!({
+          "username": "user123",
+          "email": "user@example.com",
+          "fullName": "John Doe",
+          "age": 30,
+          "interests": ["Travel", "Technology"],
+          "address": {
+            "locality": "Big City",
+            "region": "State",
+            "countryName": "Country"
+          }
+        });
+
+        let types = ["json", "jsonb"];
+        for schema_type in types {
+            for obj_type in types {
+                println!(
+                    "ID: {}",
+                    address_schema.get("$id").unwrap().as_str().unwrap()
+                );
+                // Valid address.
+                let query = format!(
+                    "SELECT jsonschema_validates('{obj}'::{ot}, '{id}', '{as}'::{st})",
+                    obj = address,
+                    ot = obj_type,
+                    id = address_id,
+                    as = address_schema,
+                    st = schema_type,
+                );
+                let result = Spi::get_one(&query)?;
+                assert_eq!(result, Some(true));
+
+                // Valid user.
+                let query = format!(
+                    "SELECT jsonschema_validates('{obj}'::{ot}, '{id}', '{us}'::{st}, '{as}'::{st})",
+                    obj = user,
+                    ot = obj_type,
+                    id = user_id,
+                    us = user_schema,
+                    as = address_schema,
+                    st = schema_type,
+                );
+                let result = Spi::get_one(&query)?;
+                assert_eq!(result, Some(true));
+
+                // Invalid json.
+                let query = format!(
+                    "SELECT jsonschema_validates('{obj}'::{ot}, '{id}', '{us}'::{st}, '{as}'::{st})",
+                    obj = json!({"username": "hello"}), // no email
+                    ot = obj_type,
+                    id = user_id,
+                    us = user_schema,
+                    as = address_schema,
+                    st = schema_type,
+                );
+                let result = Spi::get_one(&query)?;
+                assert_eq!(result, Some(false));
+
+                // Invalid schema.
+                let query = format!(
+                    "SELECT jsonschema_validates('{obj}'::{ot}, '{id}', '{us}'::{st}, '{as}'::{st})",
+                    obj = json!({"username": "hello"}), // no email
+                    ot = obj_type,
+                    id = user_id,
+                    us = user_schema,
+                    as = json!({"type": "nonesuch", "$id": "file:///lol.json"}),
+                    st = schema_type,
+                );
+                let res: Result<ErrorCaught, SpiError> = PgTryBuilder::new(|| {
+                    Spi::run(&query)?;
+                    Ok(ErrorCaught::False)
+                })
+                .catch_when(PgSqlErrorCode::ERRCODE_INTERNAL_ERROR, |e| {
+                    if let PostgresError(e) = e {
+                        assert_eq!(
+                            "file:///lol.json is not valid against metaschema",
+                            e.message(),
+                        );
+                    }
+                    Ok(ErrorCaught::True)
+                })
+                .catch_others(|e| e.rethrow())
+                .execute();
+                assert_eq!(res, Ok(ErrorCaught::True));
+
+                // NULL schema.
+                let query = format!(
+                    "SELECT jsonschema_validates('{obj}'::{ot}, '{id}', '{us}'::{st}, NULL::{st})",
+                    obj = json!({"username": "hello"}), // no email
+                    ot = obj_type,
+                    id = user_id,
+                    us = user_schema,
+                    st = schema_type,
+                );
+                let res: Result<ErrorCaught, SpiError> = PgTryBuilder::new(|| {
+                    Spi::run(&query)?;
+                    Ok(ErrorCaught::False)
+                })
+                .catch_when(PgSqlErrorCode::ERRCODE_INTERNAL_ERROR, |e| {
+                    if let PostgresError(e) = e {
+                        assert_eq!("array contains NULL", e.message(),);
+                    }
+                    Ok(ErrorCaught::True)
+                })
+                .catch_others(|e| e.rethrow())
+                .execute();
+                assert_eq!(res, Ok(ErrorCaught::True));
+
+                // NULL instance.
+                let query = format!(
+                    "SELECT jsonschema_validates(NULL::{ot}, '{id}', '{us}'::{st}, '{as}'::{st})",
+                    ot = obj_type,
+                    id = user_id,
+                    us = user_schema,
+                    as = json!({"type": "nonesuch", "$id": "file:///lol.json"}),
+                    st = schema_type,
                 );
                 let result: Option<bool> = Spi::get_one(&query)?;
                 assert_eq!(result, None);
