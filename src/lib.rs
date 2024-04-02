@@ -1,5 +1,6 @@
 use boon::{CompileError, Compiler, Schemas};
 use pgrx::prelude::*;
+use pgrx::{Json, JsonB, VariadicArray};
 use serde_json::Value;
 
 pgrx::pg_module_magic!();
@@ -56,14 +57,14 @@ macro_rules! values_for {
 
 /// json_schema_is_valid validates `schema`.
 #[pg_extern(immutable, strict, name = "jsonschema_is_valid")]
-fn json_schema_is_valid(schema: pgrx::Json) -> bool {
+fn json_schema_is_valid(schema: Json) -> bool {
     let schemas = [schema.0];
     run_compiles!(id_for!(&schemas[0]), &schemas)
 }
 
 /// jsonb_schema_is_valid validates `schema`.
 #[pg_extern(immutable, strict, name = "jsonschema_is_valid")]
-fn jsonb_schema_is_valid(schema: pgrx::JsonB) -> bool {
+fn jsonb_schema_is_valid(schema: JsonB) -> bool {
     let schemas = [schema.0];
     run_compiles!(id_for!(&schemas[0]), &schemas)
 }
@@ -71,7 +72,7 @@ fn jsonb_schema_is_valid(schema: pgrx::JsonB) -> bool {
 /// json_schema_id_is_valid validates the schema with the `$id` `id` from the
 /// `schemas`.
 #[pg_extern(immutable, strict, name = "jsonschema_is_valid")]
-fn json_schema_id_is_valid(id: &str, schemas: pgrx::VariadicArray<pgrx::Json>) -> bool {
+fn json_schema_id_is_valid(id: &str, schemas: VariadicArray<Json>) -> bool {
     let schemas = values_for!(schemas);
     run_compiles!(id, &schemas)
 }
@@ -79,7 +80,7 @@ fn json_schema_id_is_valid(id: &str, schemas: pgrx::VariadicArray<pgrx::Json>) -
 /// jsonb_schema_id_is_valid validates the schema with the `$id` `id` from the
 /// `schemas`.
 #[pg_extern(immutable, strict, name = "jsonschema_is_valid")]
-fn jsonb_schema_id_is_valid(id: &str, schemas: pgrx::VariadicArray<pgrx::JsonB>) -> bool {
+fn jsonb_schema_id_is_valid(id: &str, schemas: VariadicArray<JsonB>) -> bool {
     let schemas = values_for!(schemas);
     run_compiles!(id, &schemas)
 }
@@ -93,31 +94,33 @@ fn jsonb_schema_id_is_valid(id: &str, schemas: pgrx::VariadicArray<pgrx::JsonB>)
 
 /// json_schema_validates_json validates `json` against `schema`.
 #[pg_extern(immutable, strict, name = "jsonschema_validates")]
-fn json_schema_validates_json(json: pgrx::Json, schema: pgrx::Json) -> bool {
+fn json_schema_validates_json(json: Json, schema: Json) -> bool {
     let schemas = [schema.0];
     run_validate!(id_for!(&schemas[0]), &schemas, json.0)
 }
 
 /// jsonb_schema_validates_jsonb validates `json` against `schema`.
 #[pg_extern(immutable, strict, name = "jsonschema_validates")]
-fn jsonb_schema_validates_jsonb(json: pgrx::JsonB, schema: pgrx::JsonB) -> bool {
+fn jsonb_schema_validates_jsonb(json: JsonB, schema: JsonB) -> bool {
     let schemas = [schema.0];
     run_validate!(id_for!(&schemas[0]), &schemas, json.0)
 }
 
 /// json_schema_validates_jsonb validates `json` against `schema`.
 #[pg_extern(immutable, strict, name = "jsonschema_validates")]
-fn json_schema_validates_jsonb(json: pgrx::Json, schema: pgrx::JsonB) -> bool {
+fn json_schema_validates_jsonb(json: Json, schema: JsonB) -> bool {
     let schemas = [schema.0];
     run_validate!(id_for!(&schemas[0]), &schemas, json.0)
 }
 
 /// jsonb_schema_validates_json validates `json` against `schema`.
 #[pg_extern(immutable, strict, name = "jsonschema_validates")]
-fn jsonb_schema_validates_json(json: pgrx::JsonB, schema: pgrx::Json) -> bool {
+fn jsonb_schema_validates_json(json: JsonB, schema: Json) -> bool {
     let schemas = [schema.0];
     run_validate!(id_for!(&schemas[0]), &schemas, json.0)
 }
+
+// Multi-file document validation functions.
 
 // jsonschema_validates(doc::json,  id::text, VARIADIC schema::json)
 // jsonschema_validates(doc::jsonb, id::text, VARIADIC schema::jsonb)
@@ -127,11 +130,7 @@ fn jsonb_schema_validates_json(json: pgrx::JsonB, schema: pgrx::Json) -> bool {
 /// json_schema_id_validates_json validates `json` against the schema with the
 /// `$id` `id` in `schemas`.
 #[pg_extern(immutable, strict, name = "jsonschema_validates")]
-fn json_schema_id_validates_json(
-    json: pgrx::Json,
-    id: &str,
-    schemas: pgrx::VariadicArray<pgrx::Json>,
-) -> bool {
+fn json_schema_id_validates_json(json: Json, id: &str, schemas: VariadicArray<Json>) -> bool {
     let schemas = values_for!(schemas);
     run_validate!(id, &schemas, json.0)
 }
@@ -139,11 +138,7 @@ fn json_schema_id_validates_json(
 /// jsonb_schema_id_validates_jsonb validates `json` against the schema with
 /// the `$id` `id` in `schemas`.
 #[pg_extern(immutable, strict, name = "jsonschema_validates")]
-fn jsonb_schema_id_validates_jsonb(
-    json: pgrx::JsonB,
-    id: &str,
-    schemas: pgrx::VariadicArray<pgrx::JsonB>,
-) -> bool {
+fn jsonb_schema_id_validates_jsonb(json: JsonB, id: &str, schemas: VariadicArray<JsonB>) -> bool {
     let schemas = values_for!(schemas);
     run_validate!(id, &schemas, json.0)
 }
@@ -151,11 +146,7 @@ fn jsonb_schema_id_validates_jsonb(
 /// json_schema_id_validates_jsonb validates `json` against the schema with
 /// the `$id` `id` in `schemas`.
 #[pg_extern(immutable, strict, name = "jsonschema_validates")]
-fn json_schema_id_validates_jsonb(
-    json: pgrx::Json,
-    id: &str,
-    schemas: pgrx::VariadicArray<pgrx::JsonB>,
-) -> bool {
+fn json_schema_id_validates_jsonb(json: Json, id: &str, schemas: VariadicArray<JsonB>) -> bool {
     let schemas = values_for!(schemas);
     run_validate!(id, &schemas, json.0)
 }
@@ -163,24 +154,20 @@ fn json_schema_id_validates_jsonb(
 /// jsonb_schema_id_validates_json validates `json` against the schema with
 /// the `$id` `id` in `schemas`.
 #[pg_extern(immutable, strict, name = "jsonschema_validates")]
-fn jsonb_schema_id_validates_json(
-    json: pgrx::JsonB,
-    id: &str,
-    schemas: pgrx::VariadicArray<pgrx::Json>,
-) -> bool {
+fn jsonb_schema_id_validates_json(json: JsonB, id: &str, schemas: VariadicArray<Json>) -> bool {
     let schemas = values_for!(schemas);
     run_validate!(id, &schemas, json.0)
 }
 
 // pg_jsonschema-compatible functions.
 #[pg_extern(immutable, strict)]
-fn json_matches_schema(schema: pgrx::Json, instance: pgrx::Json) -> bool {
+fn json_matches_schema(schema: Json, instance: Json) -> bool {
     let schemas = [schema.0];
     run_validate!(id_for!(&schemas[0]), &schemas, instance.0)
 }
 
 #[pg_extern(immutable, strict)]
-fn jsonb_matches_schema(schema: pgrx::Json, instance: pgrx::JsonB) -> bool {
+fn jsonb_matches_schema(schema: Json, instance: JsonB) -> bool {
     let schemas = [schema.0];
     run_validate!(id_for!(&schemas[0]), &schemas, instance.0)
 }
@@ -201,6 +188,7 @@ enum Draft {
     V2020_12,
 }
 
+// Convert Draft into boon::Draft.
 #[allow(clippy::from_over_into)]
 impl Into<boon::Draft> for Draft {
     fn into(self) -> boon::Draft {
@@ -214,9 +202,10 @@ impl Into<boon::Draft> for Draft {
     }
 }
 
+// GUC fetches the jsonschema.default_draft GUC value.
 static GUC: pgrx::GucSetting<Draft> = pgrx::GucSetting::<Draft>::new(Draft::V2020_12);
 
-// initialize GUCs
+// initialize the jsonschema.default_draft GUC.
 fn init_guc() {
     // Register the GUC jsonschema.default_draft, with values defined by the
     // Draft enum.
@@ -421,7 +410,7 @@ mod tests {
         let address = json!({
           "postOfficeBox": "123",
           "streetAddress": "456 Main St",
-          "locality": "Cityville",
+          "locality": "Big City",
           "region": "State",
           "postalCode": "12345",
           "countryName": "Country"
@@ -431,7 +420,7 @@ mod tests {
           "email": "user@example.com",
           "fullName": "John Doe",
           "age": 30,
-          "location": "Cityville",
+          "location": "Big City",
           "interests": ["Travel", "Technology"]
         });
 
@@ -471,7 +460,7 @@ mod tests {
             &[address_schema.clone(), user_schema.clone()],
             json!({
               "username": "user123",
-              "location": "Cityville",
+              "location": "Big City",
             })
         )
         .unwrap());
@@ -484,7 +473,7 @@ mod tests {
                 "username": "user123",
                 "email": "user@example.com",
                 "address": {
-                  "locality": "Cityville",
+                  "locality": "Big City",
                   "countryName": "Country"
                 },
             })
