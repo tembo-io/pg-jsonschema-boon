@@ -1,0 +1,56 @@
+name: 🧪 Lint and Test
+
+on:
+  push:
+    branches-ignore: [wip/**]
+
+jobs:
+  lint:
+    name: 🔎 Lint Code
+    runs-on: ubuntu-latest
+    env: { PGVERSION: 16 }
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Rust Toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with: { components: "rustfmt, clippy" }
+      - name: Setup Rust Cache
+        uses: Swatinem/rust-cache@v2
+      - name: Install Postgres
+        run: sudo ./.ci/apt-install-postgres ${{ env.PGVERSION }}
+      - name: Install pgrx
+        run: cargo install cargo-pgrx --locked --version "$(perl -ne '/^pgrx\s+=\s"=?([^"]+)/ && do { print $1; exit }' Cargo.toml)"
+      - name: Initialize pgrx
+        run: cargo pgrx init --pg${{ env.PGVERSION }}="$(which pg_config)"
+      - name: Cargo format
+        run: cargo fmt --all --check
+      - name: Clippy
+        run: cargo clippy --features pg${{ env.PGVERSION }} --no-default-features
+
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        pg: [11, 12, 13, 14, 15, 16]
+        os: [[🐧, Ubuntu]] # [🍎, macOS], [🪟, Windows]]
+    name: 🐘 Postgres ${{ matrix.pg }} on ${{ matrix.os[0] }} ${{ matrix.os[1] }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Rust Toolchain
+        uses: dtolnay/rust-toolchain@stable
+      - name: Install Postgres ${{ matrix.pg }}
+        run: sudo ./.ci/apt-install-postgres ${{ matrix.pg }}
+      - name: Setup Rust Cache
+        uses: Swatinem/rust-cache@v2
+      - run: env
+      - name: Install pgrx
+        run: cargo install cargo-pgrx --locked --version "$(perl -ne '/^pgrx\s+=\s"=?([^"]+)/ && do { print $1; exit }' Cargo.toml)"
+      - name: Initialize pgrx
+        run: cargo pgrx init --pg${{ matrix.pg }}="$(which pg_config)"
+      - name: Run the tests
+        env:
+          RUST_BACKTRACE: 1
+          PGUSER: postgres
+        run: cargo test --all --no-default-features --features "pg${{ matrix.pg }} pg_test" -- --nocapture

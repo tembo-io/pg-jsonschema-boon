@@ -1,0 +1,26 @@
+#!/bin/bash
+
+set -e
+
+# Determine the version of PostgreSQL (and append .0 to a single digit)
+if [ -z ${1+x} ]; then
+    echo "ERROR: No PostgreSQL version number passed to $0"
+    echo "Usage:"
+    echo "  $0 \$PGVERSION"
+    exit 2
+fi
+
+PGVERSION=${1:-}
+[[ $PGVERSION =~ ^[0-9]$ ]] && PGVERSION+=.0
+
+apt-get update
+apt-get install -y --no-install-recommends \
+        build-essential clang llvm llvm-dev llvm-runtime cmake \
+        ca-certificates gnupg2 curl libicu-dev libxml2 locales ssl-cert
+apt-get -y purge postgresql-client-common
+
+curl https://salsa.debian.org/postgresql/postgresql-common/-/raw/master/pgdg/apt.postgresql.org.sh -O --output-dir  /usr/local/bin/
+chmod +x /usr/local/bin/apt.postgresql.org.sh
+
+apt.postgresql.org.sh -i -v "$PGVERSION"
+chmod a+rwx "$(pg_config --pkglibdir)" "$(pg_config --sharedir)/extension"

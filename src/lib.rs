@@ -658,10 +658,6 @@ mod tests {
         let types = ["json", "jsonb"];
         for schema_type in types {
             for obj_type in types {
-                println!(
-                    "ID: {}",
-                    address_schema.get("$id").unwrap().as_str().unwrap()
-                );
                 // Valid address.
                 let query = format!(
                     "SELECT jsonschema_validates('{obj}'::{ot}, '{id}', '{as}'::{st})",
