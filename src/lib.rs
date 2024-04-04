@@ -87,76 +87,76 @@ fn jsonb_schema_id_is_valid(id: &str, schemas: VariadicArray<JsonB>) -> bool {
 
 // Document validation functions.
 
-// jsonschema_validates(doc::json,  schema::json)
-// jsonschema_validates(doc::jsonb, schema::jsonb)
-// jsonschema_validates(doc::json,  schema::jsonb)
-// jsonschema_validates(doc::jsonb, schema::json)
+// jsonschema_validates(data::json,  schema::json)
+// jsonschema_validates(data::jsonb, schema::jsonb)
+// jsonschema_validates(data::json,  schema::jsonb)
+// jsonschema_validates(data::jsonb, schema::json)
 
-/// json_schema_validates_json validates `json` against `schema`.
+/// json_schema_validates_json validates `data` against `schema`.
 #[pg_extern(immutable, strict, name = "jsonschema_validates")]
-fn json_schema_validates_json(json: Json, schema: Json) -> bool {
+fn json_schema_validates_json(data: Json, schema: Json) -> bool {
     let schemas = [schema.0];
-    run_validate!(id_for!(&schemas[0]), &schemas, json.0)
+    run_validate!(id_for!(&schemas[0]), &schemas, data.0)
 }
 
-/// jsonb_schema_validates_jsonb validates `json` against `schema`.
+/// jsonb_schema_validates_jsonb validates `data` against `schema`.
 #[pg_extern(immutable, strict, name = "jsonschema_validates")]
-fn jsonb_schema_validates_jsonb(json: JsonB, schema: JsonB) -> bool {
+fn jsonb_schema_validates_jsonb(data: JsonB, schema: JsonB) -> bool {
     let schemas = [schema.0];
-    run_validate!(id_for!(&schemas[0]), &schemas, json.0)
+    run_validate!(id_for!(&schemas[0]), &schemas, data.0)
 }
 
-/// json_schema_validates_jsonb validates `json` against `schema`.
+/// json_schema_validates_jsonb validates `data` against `schema`.
 #[pg_extern(immutable, strict, name = "jsonschema_validates")]
-fn json_schema_validates_jsonb(json: Json, schema: JsonB) -> bool {
+fn json_schema_validates_jsonb(data: Json, schema: JsonB) -> bool {
     let schemas = [schema.0];
-    run_validate!(id_for!(&schemas[0]), &schemas, json.0)
+    run_validate!(id_for!(&schemas[0]), &schemas, data.0)
 }
 
-/// jsonb_schema_validates_json validates `json` against `schema`.
+/// jsonb_schema_validates_json validates `data` against `schema`.
 #[pg_extern(immutable, strict, name = "jsonschema_validates")]
-fn jsonb_schema_validates_json(json: JsonB, schema: Json) -> bool {
+fn jsonb_schema_validates_json(data: JsonB, schema: Json) -> bool {
     let schemas = [schema.0];
-    run_validate!(id_for!(&schemas[0]), &schemas, json.0)
+    run_validate!(id_for!(&schemas[0]), &schemas, data.0)
 }
 
 // Multi-file document validation functions.
 
-// jsonschema_validates(doc::json,  id::text, VARIADIC schema::json)
-// jsonschema_validates(doc::jsonb, id::text, VARIADIC schema::jsonb)
-// jsonschema_validates(doc::json,  id::text, VARIADIC schema::jsonb)
-// jsonschema_validates(doc::jsonb, id::text, VARIADIC schema::json)
+// jsonschema_validates(data::json,  id::text, VARIADIC schema::json)
+// jsonschema_validates(data::jsonb, id::text, VARIADIC schema::jsonb)
+// jsonschema_validates(data::json,  id::text, VARIADIC schema::jsonb)
+// jsonschema_validates(data::jsonb, id::text, VARIADIC schema::json)
 
-/// json_schema_id_validates_json validates `json` against the schema with the
+/// json_schema_id_validates_json validates `data` against the schema with the
 /// `$id` `id` in `schemas`.
 #[pg_extern(immutable, strict, name = "jsonschema_validates")]
-fn json_schema_id_validates_json(json: Json, id: &str, schemas: VariadicArray<Json>) -> bool {
+fn json_schema_id_validates_json(data: Json, id: &str, schemas: VariadicArray<Json>) -> bool {
     let schemas = values_for!(schemas);
-    run_validate!(id, &schemas, json.0)
+    run_validate!(id, &schemas, data.0)
 }
 
-/// jsonb_schema_id_validates_jsonb validates `json` against the schema with
+/// jsonb_schema_id_validates_jsonb validates `data` against the schema with
 /// the `$id` `id` in `schemas`.
 #[pg_extern(immutable, strict, name = "jsonschema_validates")]
-fn jsonb_schema_id_validates_jsonb(json: JsonB, id: &str, schemas: VariadicArray<JsonB>) -> bool {
+fn jsonb_schema_id_validates_jsonb(data: JsonB, id: &str, schemas: VariadicArray<JsonB>) -> bool {
     let schemas = values_for!(schemas);
-    run_validate!(id, &schemas, json.0)
+    run_validate!(id, &schemas, data.0)
 }
 
-/// json_schema_id_validates_jsonb validates `json` against the schema with
+/// json_schema_id_validates_jsonb validates `data` against the schema with
 /// the `$id` `id` in `schemas`.
 #[pg_extern(immutable, strict, name = "jsonschema_validates")]
-fn json_schema_id_validates_jsonb(json: Json, id: &str, schemas: VariadicArray<JsonB>) -> bool {
+fn json_schema_id_validates_jsonb(data: Json, id: &str, schemas: VariadicArray<JsonB>) -> bool {
     let schemas = values_for!(schemas);
-    run_validate!(id, &schemas, json.0)
+    run_validate!(id, &schemas, data.0)
 }
 
-/// jsonb_schema_id_validates_json validates `json` against the schema with
+/// jsonb_schema_id_validates_json validates `data` against the schema with
 /// the `$id` `id` in `schemas`.
 #[pg_extern(immutable, strict, name = "jsonschema_validates")]
-fn jsonb_schema_id_validates_json(json: JsonB, id: &str, schemas: VariadicArray<Json>) -> bool {
+fn jsonb_schema_id_validates_json(data: JsonB, id: &str, schemas: VariadicArray<Json>) -> bool {
     let schemas = values_for!(schemas);
-    run_validate!(id, &schemas, json.0)
+    run_validate!(id, &schemas, data.0)
 }
 
 // pg_jsonschema-compatible functions.
@@ -258,7 +258,6 @@ fn compiles(id: &str, schemas: &[Value]) -> Result<(), CompileError> {
     let mut c = new_compiler(id, schemas)?;
     let mut schemas = Schemas::new();
     c.compile(id, &mut schemas)?;
-
     Ok(())
 }
 
@@ -484,13 +483,110 @@ mod tests {
     }
 
     #[pg_test]
-    fn test_jsonb_matches_schema() {
+    fn test_jsonschema_is_valid() {
+        assert!(crate::json_schema_is_valid(Json(json!({"type": "object"})),));
+        assert!(crate::jsonb_schema_is_valid(JsonB(
+            json!({"type": "object"})
+        )));
+
+        // pg_jsonschema-compatible functions
         assert!(crate::jsonb_matches_schema(
             Json(json!({"type": "object"})),
             JsonB(json!({"hi": "there"})),
         ));
+        assert!(crate::json_matches_schema(
+            Json(json!({"type": "object"})),
+            Json(json!({"hi": "there"})),
+        ));
     }
 
+    #[pg_test]
+    fn test_jsonschema_is_valid_one() -> spi::Result<()> {
+        let types = ["json", "jsonb"];
+        for schema_type in types {
+            // Valid.
+            let query = format!(
+                "SELECT jsonschema_is_valid('{}'::{})",
+                json!({"type": "object"}),
+                schema_type,
+            );
+            let result = Spi::get_one(&query)?;
+            assert_eq!(result, Some(true));
+
+            // Invalid.
+            let query = format!(
+                "SELECT jsonschema_is_valid('{}'::{})",
+                json!(["Not a schema"]),
+                schema_type,
+            );
+            let result = Spi::get_one(&query)?;
+            assert_eq!(result, Some(false));
+
+            // NULL json.
+            let query = format!("SELECT jsonschema_is_valid(NULL::{})", schema_type,);
+            let result: Option<bool> = Spi::get_one(&query)?;
+            assert_eq!(result, None);
+        }
+
+        Ok(())
+    }
+
+    #[pg_test]
+    fn test_jsonschema_is_valid_multi() -> spi::Result<()> {
+        let address_schema = load_json("address.schema.json");
+        let user_schema = load_json("user-profile.schema.json");
+        let address_id = address_schema.get("$id").unwrap().as_str().unwrap();
+        let user_id = user_schema.get("$id").unwrap().as_str().unwrap();
+
+        let types = ["json", "jsonb"];
+        for schema_type in types {
+            // Single valid.
+            let query = format!(
+                "SELECT jsonschema_is_valid('{}', '{}'::{})",
+                address_id, address_schema, schema_type,
+            );
+            let result = Spi::get_one(&query)?;
+            assert_eq!(result, Some(true));
+
+            // Multi valid.
+            let query = format!(
+                "SELECT jsonschema_is_valid('{}', '{}'::{}, '{}'::{})",
+                user_id, user_schema, schema_type, address_schema, schema_type,
+            );
+            let result = Spi::get_one(&query)?;
+            assert_eq!(result, Some(true));
+
+            // Invalid.
+            let query = format!(
+                "SELECT jsonschema_is_valid('{}', '{}'::{})",
+                "foo",
+                json!({"type": "nonesuch"}),
+                schema_type,
+            );
+            let result = Spi::get_one(&query)?;
+            assert_eq!(result, Some(false));
+
+            // Default ID.
+            let query = format!(
+                "SELECT jsonschema_is_valid('{}', '{}'::{})",
+                "nonesuch",
+                json!({"type": "object"}),
+                schema_type,
+            );
+            let result = Spi::get_one(&query)?;
+            assert_eq!(result, Some(true));
+
+            // No such ID.
+            let query = format!(
+                "SELECT jsonschema_is_valid('{}', '{}'::{})",
+                "file:///nonesuch", address_schema, schema_type,
+            );
+            let result = Spi::get_one(&query)?;
+            assert_eq!(result, Some(false));
+        }
+
+        Ok(())
+    }
     #[pg_test]
     fn test_json_matches_schema_sql() -> spi::Result<()> {
         // pg_jsonschema-compatible function.
@@ -769,10 +865,10 @@ mod tests {
         assert_eq!(Some("V2020_12"), draft);
         assert_eq!(Draft::V2020_12, GUC.get());
 
-        Spi::run("SELECT set_config('jsonschema.default_draft', 'V6', false)")?;
+        Spi::run("SELECT set_config('jsonschema.default_draft', 'V2019_09', false)")?;
         let draft = Spi::get_one("SELECT current_setting('jsonschema.default_draft')")?;
-        assert_eq!(Some("V6"), draft);
-        assert_eq!(Draft::V6, GUC.get());
+        assert_eq!(Some("V2019_09"), draft);
+        assert_eq!(Draft::V2019_09, GUC.get());
 
         Spi::run("SET jsonschema.default_draft TO 'V4'")?;
         let draft = Spi::get_one("SHOW jsonschema.default_draft")?;
