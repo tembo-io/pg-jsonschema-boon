@@ -1,0 +1,150 @@
+#!/usr/bin/env perl
+
+package mknotes;
+
+use strict;
+use warnings;
+use v5.30;
+use Getopt::Long qw(GetOptions);
+use File::Path qw(make_path);
+use File::Basename qw(dirname);
+use utf8;
+
+my $item_regex = qr/^[*-+]\s+/;
+my $indent_regex = qr/^\s+/;
+
+sub new {
+    my $self = {
+        version => '',
+        file    => '',
+        repo    => '',
+        output  => '',
+    };
+
+    GetOptions(
+        "f=s" => \$self->{file},
+        "v=s" => \$self->{version},
+        "r=s" => \$self->{repo},
+        "o=s" => \$self->{output},
+    ) or die("Error in command line arguments\n");
+
+    if (!$self->{file} || !$self->{version} || !$self->{repo}) {
+        die "Usage: mknotes -v [VERSION] -f [CHANGELOG] -r [REPO]\n";
+	}
+
+	# Trim a slash from the URI.
+    $self->{repo} =~ s{/$}{};
+
+	bless $self => __PACKAGE__;
+}
+
+sub run {
+    my $self = shift;
+
+    open my $fh, '<:encoding(UTF-8)', $self->{file}
+        or die "Cannot open $self->{file}: $!\n";
+
+	# Print to STDOUT by default.
+    my $out;
+    if ($self->{output}) {
+        my $dir = dirname $self->{output};
+        make_path $dir unless -d $dir;
+        open $out, '>:encoding(UTF-8)', $self->{output}
+            or die "Cannot open $self->{output}: $!\n";
+    } else {
+        $out = \*STDOUT;
+        binmode $out, ':encoding(UTF-8)';
+    }
+
+	my $header = "## [v$self->{version}]";
+	my ($found, $in_item) = (0, 0);
+
+    while (my $line = <$fh>) {
+        if ($line =~ /^\Q$header/) {
+			# Found the header for this version. Build a regex for its link
+			# reference.
+			$found = 1;
+            my $link_regex = qr/^\s*\Q[v$self->{version}]\E:\s+https:/;
+
+			# Continue scanning until we reach the next `## ` header.
+            while (my $line = <$fh>) {
+                chomp $line;
+                return $self->finish_list($out, $line) if $line =~ /^## /;
+
+			    # Skip the line if it's the link reference for the header.
+                $in_item = $self->print_line($out, $line, $in_item)
+                    unless $line =~ $link_regex;
+			}
+        }
+    }
+
+    # All done!
+    die "Version $self->{version} not found in $self->{file}\n" unless $found;
+}
+
+# Called when the next version header is found in line.
+sub finish_list {
+    my ($self, $out, $line) = @_;
+	# Next header. Extract its version.
+
+    my ($prev) = $line =~ /\[([^]]+)\]/;
+	die "No version found in $line\n" unless $prev;
+
+	# Emit a footer line with a link to the diff for this version.
+    print {$out} sprintf(
+		"---\n\n🆚 For more detail compare [changes since %s](%s/compare/%s...%s).\n",
+		$prev, $self->{repo}, $prev, $self->{version},
+	);
+
+	# All done.
+	return 1;
+}
+
+# Called for a line to print, keeping track of list item status.
+sub print_line {
+    my ($self, $out, $line, $in_item) = @_;
+	# Convert wrapped list items to single lines.
+    if ($line =~ $item_regex) {
+		if ($in_item) {
+			# Previous item done
+            print {$out} "\n";
+		} else {
+			# We're in an item now.
+			$in_item = 1
+		}
+		# Print the line with no newline.
+        print {$out} $line;
+
+		return $in_item;
+	}
+
+	if ($in_item) {
+		# In an item, but not starting a new item.
+		if ($line =~ $indent_regex) {
+			# Continued item, convert indent to single space.
+			$line =~ s/$indent_regex/ /g;
+			# Print without newline.
+            print {$out} $line;
+		} else {
+			# No longer in an item.
+			$in_item = 0;
+			# Previous item done; print complete line.
+            print {$out} "\n", $line, "\n";
+		}
+
+		return $in_item;
+	}
+
+	# Not in an item.
+	$in_item = 0;
+	# Print complete line
+    print {$out} $line, "\n";
+
+	return $in_item;
+}
+
+package main;
+
+mknotes->new->run;
+
+__END__

@@ -5,3 +5,5 @@
 **/*.rs.bk
 Cargo.lock
 .vscode/
+META.json
+jsonschema-*

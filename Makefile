@@ -1,6 +1,8 @@
 PG_CONFIG   ?= $(shell which pg_config)
-PGRXV="$(shell perl -nE '/^pgrx\s+=\s"=?([^"]+)/ && do { say $$1; exit }' Cargo.toml)"
-PGV=$(shell perl -E 'shift =~ /(\d+)/ && say $$1' "$(shell $(PG_CONFIG) --version)")
+DISTNAME     = $(shell perl -nE '/^name\s*=\s*"([^"]+)/ && do { say $$1; exit }' Cargo.toml)
+DISTVERSION  = $(shell perl -nE '/^version\s*=\s*"([^"]+)/ && do { say $$1; exit }' Cargo.toml)
+PGRXV        = $(shell perl -nE '/^pgrx\s+=\s"=?([^"]+)/ && do { say $$1; exit }' Cargo.toml)
+PGV          = $(shell perl -E 'shift =~ /(\d+)/ && say $$1' "$(shell $(PG_CONFIG) --version)")
 
 .DEFAULT_GOAL: package # Build jsonshcmea for the PostgreSQL cluster identified by pg_config.
 package:
@@ -29,6 +31,21 @@ pgrx-version:
 pg-version: Cargo.toml
 	@echo $(PGV)
 
-## cleaan: Remove build artifacts and intermediate files.
+## clean: Remove build artifacts and intermediate files.
 clean: target
 	@cargo clean
+	@rm -rf META.json $(DISTNAME)-$(DISTVERSION).zip
+
+# Create the PGXN META.json file.
+META.json: META.json.in Cargo.toml
+	@sed "s/@CARGO_VERSION@/$(DISTVERSION)/g" $< > $@
+
+# Create a PGXN-compatible zip file.
+$(DISTNAME)-$(DISTVERSION).zip: META.json
+	git archive --format zip --prefix $(DISTNAME)-$(DISTVERSION)/ --add-file $< -o $(DISTNAME)-$(DISTVERSION).zip HEAD
+
+## pgxn-zip: Create a PGXN-compatible zip file.
+pgxn-zip: $(DISTNAME)-$(DISTVERSION).zip
+
+target/release-notes.md: CHANGELOG.md .ci/mknotes
+	@./.ci/mknotes -v $(DISTVERSION) -f $< -r https://github.com/$(or $(GITHUB_REPOSITORY),tembo-io/pg-jsonschema) -o $@
