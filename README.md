@@ -1,8 +1,10 @@
 JSON Schema Postgres Extension
 ==============================
 
-[![PGXN version](https://badge.fury.io/pg/jsonschema.svg)](https://badge.fury.io/pg/jsonschema)
-[![🧪 Lint and Test](https://github.com/tembo-io/pg-jsonschema/actions/workflows/lint-and-test.yml/badge.svg)](https://github.com/tembo-io/pg-jsonschema/actions/workflows/lint-and-test.yml)
+[![MIT License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT "⚖️ MIT License")
+[![PGXN Version](https://badge.fury.io/pg/jsonschema.svg)](https://badge.fury.io/pg/jsonschema "⚙️ PGXN Version")
+[![Build Status](https://github.com/tembo-io/pg-jsonschema/actions/workflows/lint-and-test.yml/badge.svg)](https://github.com/tembo-io/pg-jsonschema/actions/workflows/lint-and-test.yml "🧪 Lint and Test")
+[![Code Coverage](https://codecov.io/gh/tembo-io/pg-jsonschema/graph/badge.svg?token=DIFED324ZY)](https://codecov.io/gh/tembo-io/pg-jsonschema "📊 Code Coverage")
 
 This library provides the `jsonschema` extension for validating JSON and JSONB
 against a [JSON Schema] in Postgres. It supports the following [specification
@@ -32,19 +34,19 @@ Then use `cargo` to install `pgrx`:
 cargo install --locked cargo-pgrx --version 0.11.3
 ```
 
-Now build jsonschema against a working PostgreSQL server (including
-development libraries and the [pg_config] utility). Here's an example
-using PostgreSQL 15:
+Now build and jsonschema against a working PostgreSQL server, including
+development libraries and the [pg_config], which must be in the path:
 
 ``` sh
-cargo pgrx init --pg15="$(which pg_config)"
+make
+make install
 ```
 
-Adjust the `--pg15` option to your PostgreSQL version. Then build and install
-`jsonschema`:
+To build with a different `pg_config`, pass it to `make`:
 
-```sh
-cargo pgrx install --release
+``` sh
+make PG_CONFIG=/path/to_pg_config
+make install PG_CONFIG=/path/to_pg_config
 ```
 
 Once jsonschema is installed, you can add it to a database. Simply connect to

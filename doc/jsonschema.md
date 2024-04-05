@@ -66,7 +66,7 @@ the default), set the `jsonschema.default_draft` configuration to your
 preferred default. To set the default for the current session to 2019-09, run:
 
 ``` postgres
-SET jsonschema.default_draft TO 'V2019_09';
+SET jsonschema.default_draft TO 'V2019';
 ```
 
 For a system-wide default, set it in the `postgresql.conf` file:
@@ -80,8 +80,8 @@ The supported values are:
 *   `V4`: Draft for `http://json-schema.org/draft-04/schema`
 *   `V6`: Draft for `http://json-schema.org/draft-06/schema`
 *   `V7`: Draft for `http://json-schema.org/draft-07/schema`
-*   `V2019_09`: Draft for `https://json-schema.org/draft/2019-09/schema`
-*   `V2020_12`: Draft for `https://json-schema.org/draft/2020-12/schema`
+*   `V2019`: Draft for `https://json-schema.org/draft/2019-09/schema`
+*   `V2020`: Draft for `https://json-schema.org/draft/2020-12/schema`
 
 Functions
 ---------

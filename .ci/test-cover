@@ -1,0 +1,48 @@
+#!/bin/bash
+
+set -e
+
+# Determine the version of PostgreSQL.
+if [ -z ${1+x} ] || [ -z ${2+x} ]; then
+    echo "ERROR: No PostgreSQL OR PGRX version number passed to $0"
+    echo "Usage:"
+    echo "  $0 \$PG_VERSION \$PGRX_VERSION"
+    exit 2
+fi
+
+PGVERSION=${1:-}
+PGRXVERSION=${2:-}
+
+# Must be absolute to get all the data files from Postgres, too.
+DESTDIR="${PWD}/target/cover"
+
+rustup component add llvm-tools
+cargo install grcov "cargo-pgrx@${PGRXVERSION}"
+
+export RUSTFLAGS="-Cinstrument-coverage"
+if [ "$(uname -o)" = "Darwin" ]; then
+    export RUSTFLAGS="-Clink-arg=-Wl,-undefined,dynamic_lookup $RUSTFLAGS"
+fi
+
+export LLVM_PROFILE_FILE="${DESTDIR}/default_%m_%p.profraw"
+cargo test --all --no-default-features --features "pg${PGVERSION} pg_test" -- --nocapture
+
+grcov "${DESTDIR}" \
+    --ignore '**/clang-sys*/**' \
+    --ignore '**/pgrx-pg-sys*/**' \
+    --ignore "$HOME/.cargo/**" \
+    --ignore-not-existing \
+    --excl-start 'begin_impossible!' \
+    --excl-stop 'end_impossible!' \
+    --llvm \
+    --binary-path "target/debug/" \
+    -s . \
+    --branch \
+    -o "${DESTDIR}" \
+    --output-types html,cobertura
+
+xmllint --xpath "concat('Coverage: ', 100 * string(//coverage/@line-rate), '%')" "${DESTDIR}/cobertura.xml"
+
+if [ "$(uname -o)" = "Darwin" ] && [ -z "$CI" ]; then
+	open "${DESTDIR}/html/index.html"
+fi

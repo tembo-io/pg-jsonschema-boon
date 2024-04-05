@@ -183,9 +183,9 @@ enum Draft {
     /// Draft for `http://json-schema.org/draft-07/schema`
     V7,
     /// Draft for `https://json-schema.org/draft/2019-09/schema`
-    V2019_09,
+    V2019,
     /// Draft for `https://json-schema.org/draft/2020-12/schema`
-    V2020_12,
+    V2020,
 }
 
 // Convert Draft into boon::Draft.
@@ -196,14 +196,14 @@ impl Into<boon::Draft> for Draft {
             Draft::V4 => boon::Draft::V4,
             Draft::V6 => boon::Draft::V6,
             Draft::V7 => boon::Draft::V7,
-            Draft::V2019_09 => boon::Draft::V2019_09,
-            Draft::V2020_12 => boon::Draft::V2020_12,
+            Draft::V2019 => boon::Draft::V2019_09,
+            Draft::V2020 => boon::Draft::V2020_12,
         }
     }
 }
 
 // GUC fetches the jsonschema.default_draft GUC value.
-static GUC: pgrx::GucSetting<Draft> = pgrx::GucSetting::<Draft>::new(Draft::V2020_12);
+static GUC: pgrx::GucSetting<Draft> = pgrx::GucSetting::<Draft>::new(Draft::V2020);
 
 // initialize the jsonschema.default_draft GUC.
 fn init_guc() {
@@ -318,8 +318,8 @@ mod tests {
         assert_eq!(boon::Draft::V4, Draft::V4.into());
         assert_eq!(boon::Draft::V6, Draft::V6.into());
         assert_eq!(boon::Draft::V7, Draft::V7.into());
-        assert_eq!(boon::Draft::V2019_09, Draft::V2019_09.into());
-        assert_eq!(boon::Draft::V2020_12, Draft::V2020_12.into());
+        assert_eq!(boon::Draft::V2019_09, Draft::V2019.into());
+        assert_eq!(boon::Draft::V2020_12, Draft::V2020.into());
     }
 
     #[test]
@@ -862,13 +862,13 @@ mod tests {
     #[pg_test]
     fn test_draft_schema_guc() -> spi::Result<()> {
         let draft = Spi::get_one("SELECT current_setting('jsonschema.default_draft')")?;
-        assert_eq!(Some("V2020_12"), draft);
-        assert_eq!(Draft::V2020_12, GUC.get());
+        assert_eq!(Some("V2020"), draft);
+        assert_eq!(Draft::V2020, GUC.get());
 
-        Spi::run("SELECT set_config('jsonschema.default_draft', 'V2019_09', false)")?;
+        Spi::run("SELECT set_config('jsonschema.default_draft', 'V2019', false)")?;
         let draft = Spi::get_one("SELECT current_setting('jsonschema.default_draft')")?;
-        assert_eq!(Some("V2019_09"), draft);
-        assert_eq!(Draft::V2019_09, GUC.get());
+        assert_eq!(Some("V2019"), draft);
+        assert_eq!(Draft::V2019, GUC.get());
 
         Spi::run("SET jsonschema.default_draft TO 'V4'")?;
         let draft = Spi::get_one("SHOW jsonschema.default_draft")?;
