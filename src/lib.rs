@@ -5,14 +5,16 @@ use serde_json::Value;
 
 pgrx::pg_module_magic!();
 
-// id_for returns the schema `$id` for $x, falling back on "file:///schema.json" if $x
-// has no `$id`.
+const DEFAULT_URL: &str = "file:///schema.json";
+
+// id_for returns the schema `$id` for $x, setting it to and returning
+// "file:///schema.json" if $x has no `$id`.
 macro_rules! id_for {
     ($x:expr) => {
         if let Value::String(s) = &$x["$id"] {
             s
         } else {
-            "file:///schema.json"
+            DEFAULT_URL
         }
     };
 }

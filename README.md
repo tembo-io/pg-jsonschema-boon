@@ -6,7 +6,7 @@ JSON Schema Postgres Extension
 [![Build Status](https://github.com/tembo-io/pg-jsonschema/actions/workflows/lint-and-test.yml/badge.svg)](https://github.com/tembo-io/pg-jsonschema/actions/workflows/lint-and-test.yml "🧪 Lint and Test")
 [![Code Coverage](https://codecov.io/gh/tembo-io/pg-jsonschema/graph/badge.svg?token=DIFED324ZY)](https://codecov.io/gh/tembo-io/pg-jsonschema "📊 Code Coverage")
 
-[Change Log](CHANGELOG.md) | [Documentation](doc/jsonschema.md)
+**[Change Log](CHANGELOG.md)** | **[Documentation](doc/jsonschema.md)**
 
 This library provides the `jsonschema` extension for validating JSON and JSONB
 against a [JSON Schema] in Postgres. It supports the following [specification
@@ -30,10 +30,10 @@ simplest way to install Rust is [rustup]:
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 ```
 
-Then use `cargo` to install `pgrx`:
+Then install `pgrx`:
 
 ```sh
-cargo install --locked cargo-pgrx --version 0.11.3
+make install-pgrx
 ```
 
 Now build and jsonschema against a working PostgreSQL server, including

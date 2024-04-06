@@ -31,6 +31,10 @@ pgrx-version:
 pg-version: Cargo.toml
 	@echo $(PGV)
 
+.PHONY: install-pgrx # Install the version of PGRX specified in Cargo.toml.
+install-pgrx: Cargo.toml
+	@cargo install --locked cargo-pgrx --version "$(PGRXV)"
+
 ## clean: Remove build artifacts and intermediate files.
 clean: target
 	@cargo clean
