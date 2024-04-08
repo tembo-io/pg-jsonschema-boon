@@ -75,12 +75,48 @@ At build time it requires [Rust] and [pgrx].
 Prior Art
 ---------
 
-*   [postgres-json-schema]: JSON Schema Postgres extension written with pgrx +
-    jsonschema
+*   [pg_jsonschema]: JSON Schema Postgres extension written with pgrx +
+    the [jsonschema crate]
+*   [pgx_json_schema]: Slightly older JSON Schema Postgres extension written
+    with pgrx + the [jsonschema crate]
 *   [postgres-json-schema]: JSON Schema Postgres extension written in PL/pgSQL
 *   [is_jsonb_valid]: JSON Schema Postgres extension written in C
-*   [pgx_json_schema]: JSON Schema Postgres extension written with pgrx +
-    jsonschema
+
+Benchmark
+---------
+
+A quick benchmark in [`eg/bench.sql](eg/bench.sql) compares the performance
+for a simple validation a check constraint between the jsonschema and
+[pg_jsonschema]. Example running PostgreSQL 16 on an M3 Max MacBook Pro with
+32G of RAM:
+
+``` console
+$ psql -Xf eg/bench.sql --set extension=pg_jsonschema
+
+######################################################################
+# Test pg_jsonschema JSON validation for 200_000 iterations
+######################################################################
+Time: 8170.906 ms (00:08.171)
+
+
+######################################################################
+# Test pg_jsonschema JSONB validation for 200_000 iterations
+######################################################################
+Time: 8215.921 ms (00:08.216)
+
+
+$ psql -Xf eg/bench.sql --set extension=jsonschema
+
+######################################################################
+# Test jsonschema JSON validation for 200_000 iterations
+######################################################################
+Time: 3356.828 ms (00:03.357)
+
+######################################################################
+# Test jsonschema JSONB validation for 200_000 iterations
+######################################################################
+Time: 3428.245 ms (00:03.428)
+```
 
 Copyright and License
 ---------------------
@@ -126,6 +162,7 @@ SOFTWARE.
   [pg_config]: https://www.postgresql.org/docs/current/app-pgconfig.html "PostgreSQL Docs: pg_config"
   [CREATE EXTENSION]: https://www.postgresql.org/docs/current/sql-createextension.html
     "PostgreSQL Docs: CREATE EXTENSION"
+  [jsonschema crate]: https://docs.rs/jsonschema/latest/jsonschema/
   [pg_jsonschema]: https://github.com/supabase/pg_jsonschema
   [postgres-json-schema]: https://github.com/gavinwahl/postgres-json-schema
   [is_jsonb_valid]: https://github.com/furstenheim/is_jsonb_valid

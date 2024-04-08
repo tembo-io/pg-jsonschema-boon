@@ -221,9 +221,9 @@ fn init_guc() {
     );
 }
 
-// Executes when Postgres loads the extension shared object library, which it
-// does the first time it's used (and in the session where its loaded by
-// `CREATE EXTENSION`).
+/// _PG_init executes when Postgres loads the extension shared object library,
+/// which it does the first time it's used, either by `CREATE EXTENSION` and
+/// `UPDATE EXTENSION` or when one of its functions is called.
 #[pg_guard]
 extern "C" fn _PG_init() {
     init_guc();
@@ -311,7 +311,7 @@ mod tests {
     fn load_json(name: &str) -> Value {
         let root_dir = env::var("CARGO_MANIFEST_DIR").unwrap();
         let root = Path::new(&root_dir);
-        serde_json::from_reader(File::open(root.join("schemas").join(name)).unwrap()).unwrap()
+        serde_json::from_reader(File::open(root.join("eg").join(name)).unwrap()).unwrap()
     }
 
     // Make sure our Draft enum converts properly into boon's.
