@@ -11,26 +11,26 @@ CREATE EXTENSION
 
 try=# -- Define a JSON schema
 try=# SELECT '{
-try'#   "type": "object",
-try'#   "required": [ "name", "email" ],
-try'#   "properties": {
-try'#     "name": { "type": "string" },
-try'#     "age": { "type": "number", "minimum": 0 },
-try'#     "email": {"type": "string", "format": "email" }
-try'#   }
-try'# }' AS schema \gset
+   "type": "object",
+   "required": [ "name", "email" ],
+   "properties": {
+     "name": { "type": "string" },
+     "age": { "type": "number", "minimum": 0 },
+     "email": {"type": "string", "format": "email" }
+   }
+ }' AS schema \gset
 
 try=# -- Make sure it's valid
-jsonschema=# SELECT jsonschema_is_valid(:'schema'::json);
+try=# SELECT jsonschema_is_valid(:'schema'::json);
  jsonschema_is_valid
 ---------------------
  t
 
 try=# -- Define an object to validate
 try=# SELECT '{
-try'#   "name": "Amos Burton",
-try'#   "email": "amos@rocinante.ship"
-try'# }' AS person \gset
+   "name": "Amos Burton",
+   "email": "amos@rocinante.ship"
+ }' AS person \gset
 
 try=# -- Validate it against the schema
 try=# SELECT jsonschema_validates(:'person'::json, :'schema'::json);
@@ -53,6 +53,207 @@ It supports the following [specification drafts][spec]:
 *   [![draft 7 badge]][draft 7 report]
 *   [![draft 2019-09 badge]][draft 2019-09 report]
 *   [![draft 2020-12 badge]][draft 2020-12 report]
+
+What, Another One?
+------------------
+
+This is not the first JSON Schema validation extension for Postgres. Why
+another one? (Let's just ignore that the work was pretty far along before
+learning of the prior art.) What's different about this extension compared to
+the [prior art](#prior-art)?
+
+*   **Full 2020-12 draft compatibility.** The [boon crate] used by jsonschema
+    is the only Rust crate that fully supports the JSON Schema [2020-12
+    draft].
+*   **Complex Schema Composition.** While the existing extensions nicely
+    support simple, single-file JSON Schemas, this extension fully supports
+    [multi-file schema definition][composition]. This allows multiple smaller
+    schemas to be composed into larger, more complicated schemas.
+*   **Performance.** The [boon crate] provides the highest level of schema
+    validation performance. In a [simple test], the jsonschema validates JSON
+    and JSONB objects in a CHECK constraint 2.3x faster than [pg_jsonschema].
+
+For many use cases these features aren't necessary. But once schemas become
+more complicated or require more advanced features of the [2020-12 draft],
+give the jsonschema extension a try.
+
+Schema Composition
+------------------
+
+Schema composition enables componentized structuring of a schema across
+multiple sub-schemas. JSON Schema refers to this pattern as [Structuring a
+complex schema][composition]. The idea is that each schema has a URI in an
+`$id` property that identifiers it, and other schemas can reference it.
+
+For example, an address schema defined like so:
+
+``` json
+{
+  "$id": "https://example.com/schemas/address",
+  "type": "object",
+  "properties": {
+    "street_address": { "type": "string" },
+    "city": { "type": "string" },
+    "state": { "type": "string" }
+  },
+  "required": ["street_address", "city", "state"]
+}
+```
+
+Can be referenced in another schema by using the `$ref` keyword. This is handy
+to avoid duplication, as in this example:
+
+``` json
+{
+  "$id": "https://example.com/schemas/customer",
+  "type": "object",
+  "properties": {
+    "first_name": { "type": "string" },
+    "last_name": { "type": "string" },
+    "shipping_address": { "$ref": "/schemas/address" },
+    "billing_address": { "$ref": "/schemas/address" }
+  },
+  "required": ["first_name", "last_name", "shipping_address", "billing_address"]
+}
+```
+
+Note that `shipping_address` and `billing_address` both reference
+`/schemas/address`. This URI is resolved against the schema `$id`,
+`https://example.com/schemas/customer`, which is the base URI for the schema.
+Relative to that URI, `/schemas/address` becomes
+`https://example.com/schemas/address` resolving to the address schema's `$id`.
+
+The jsonschema extension supports this pattern by allowing multiple schemas to
+be passed to its functions. Say we have the above two schemas loaded into
+[psql] variables (you can paste these commands into `psql` to refer to in the
+example below):
+
+``` psql
+SELECT '{
+  "$id": "https://example.com/schemas/address",
+  "type": "object",
+  "properties": {
+    "street_address": { "type": "string" },
+    "city": { "type": "string" },
+    "state": { "type": "string" }
+  },
+  "required": ["street_address", "city", "state"]
+}'  AS addr_schema \gset
+
+SELECT '{
+  "$id": "https://example.com/schemas/customer",
+  "type": "object",
+  "properties": {
+    "first_name": { "type": "string" },
+    "last_name": { "type": "string" },
+    "shipping_address": { "$ref": "/schemas/address" },
+    "billing_address": { "$ref": "/schemas/address" }
+  },
+  "required": ["first_name", "last_name", "shipping_address", "billing_address"]
+}' AS cust_schema \gset
+```
+
+We validate the customer schema by its ID and passing both schemas to
+`jsonschema_is_valid()`:
+
+```psql
+SELECT jsonschema_is_valid(
+    'https://example.com/schemas/customer',
+    :'addr_schema'::json, :'cust_schema'::json
+);
+ jsonschema_is_valid
+---------------------
+ t
+```
+
+Any number of schemas can be passed, allowing for arbitrarily complex schemas.
+The same is true for validating JSON values against a composed schema:
+
+```
+SELECT jsonschema_validates(
+    json_build_object(
+      'first_name', 'Naomi',
+      'last_name', 'Nagata',
+      'shipping_address', json_build_object(
+        'street_address', '1 Rocinante Way',
+        'city', 'Ceres Station',
+        'state', 'The Belt'
+      ),
+      'billing_address', json_build_object(
+        'street_address', '2112 Rush Ave',
+        'city', 'Londres Nova',
+        'state', 'Mars'
+      )
+    ),
+    'https://example.com/schemas/customer',
+    :'addr_schema'::json, :'cust_schema'::json
+);
+ jsonschema_validates
+----------------------
+ t
+```
+
+Of course, if your build pipeline supports it you can also [bundle] all of the
+sub-schemas required to compose a schema and then just have the one, with no
+need to refer to it by `$id`. For example,
+
+```psql
+SELECT '{
+  "$id": "https://example.com/schemas/customer",
+  "type": "object",
+  "properties": {
+    "first_name": { "type": "string" },
+    "last_name": { "type": "string" },
+    "shipping_address": { "$ref": "/schemas/address" },
+    "billing_address": { "$ref": "/schemas/address" }
+  },
+  "required": ["first_name", "last_name", "shipping_address", "billing_address"],
+  "$defs": {
+    "address": {
+      "$id": "/schemas/address",
+      "type": "object",
+      "properties": {
+        "street_address": { "type": "string" },
+        "city": { "type": "string" },
+        "state": { "type": "string" }
+      },
+      "required": ["street_address", "city", "state"]
+    }
+  }
+}' AS cust_schema \gset
+```
+
+Note that the only change to the address schema is tha it has been embedded in
+the `$defs` object and its `$id` is no longer fully-qualified. Now with this
+one bundled schema, we can omit the `id` parameter:
+
+```psql
+SELECT jsonschema_is_valid(:'cust_schema'::json);
+ jsonschema_is_valid
+---------------------
+ t
+
+SELECT jsonschema_validates(
+    json_build_object(
+      'first_name', 'Naomi',
+      'last_name', 'Nagata',
+      'shipping_address', json_build_object(
+        'street_address', '1 Rocinante Way',
+        'city', 'Ceres Station',
+        'state', 'The Belt'
+      ),
+      'billing_address', json_build_object(
+        'street_address', '2112 Rush Ave',
+        'city', 'Londres Nova',
+        'state', 'Mars'
+      )
+    ),
+    :'cust_schema'::json
+);
+ jsonschema_validates
+----------------------
+ t
+ ```
 
 Configuration
 -------------
@@ -208,6 +409,16 @@ The one other [pg_jsonschema] function, `jsonschema_is_valid()`, goes by [the
 same name](#jsonschema_is_validschema) and has a compatible signature in this
 extension.
 
+Prior Art
+---------
+
+*   [pg_jsonschema]: JSON Schema Postgres extension written with pgrx +
+    the [jsonschema crate]
+*   [pgx_json_schema]: Slightly older JSON Schema Postgres extension written
+    with pgrx + the [jsonschema crate]
+*   [postgres-json-schema]: JSON Schema Postgres extension written in PL/pgSQL
+*   [is_jsonb_valid]: JSON Schema Postgres extension written in C
+
 Support
 -------
 
@@ -256,6 +467,17 @@ SOFTWARE.
   [draft 2019-09 report]: https://bowtie.report/#/dialects/draft2019-09 "boon draft 2019-09 report"
   [draft 2020-12 badge]: https://img.shields.io/endpoint?url=https://bowtie.report/badges/rust-boon/compliance/draft2020-12.json
   [draft 2020-12 report]: https://bowtie.report/#/dialects/draft2020-12 "boon draft 2020-12 report"
+  [boon crate]: https://github.com/santhosh-tekuri/boon/ "boon: JSONSchema (draft 2020-12, draft 2019-09, draft-7, draft-6, draft-4) Validation in Rust"
+  [2020-12 draft]: https://json-schema.org/draft/2020-12/release-notes "JSON Schema: 2020-12 Release Notes"
+  [composition]: https://json-schema.org/understanding-json-schema/structuring
+    "JSON Schema: Structuring a complex schema"
+  [simple test]: https://github.com/tembo-io/pg-jsonschema/#benchmark
+  [psql]: https://www.postgresql.org/docs/current/app-psql.html "PostgreSQL Docs: psql"
+  [bundle]: https://json-schema.org/understanding-json-schema/structuring#bundling
   [`$schema` field]: https://json-schema.org/draft/2020-12/json-schema-core#name-the-schema-keyword
   [`$id` field]: https://json-schema.org/draft/2020-12/json-schema-core#name-the-id-keyword
   [pg_jsonschema]: https://github.com/supabase/pg_jsonschema
+  [jsonschema crate]: https://docs.rs/jsonschema/latest/jsonschema/
+  [postgres-json-schema]: https://github.com/gavinwahl/postgres-json-schema
+  [is_jsonb_valid]: https://github.com/furstenheim/is_jsonb_valid
+  [pgx_json_schema]: https://github.com/jefbarn/pgx_json_schema

@@ -28,7 +28,7 @@
           "type": "string"
         }
       },
-      "address": { "$ref": "https://example.com/address.schema.json" }
+      "address": { "$ref": "/address.schema.json" }
     }
   }
   
