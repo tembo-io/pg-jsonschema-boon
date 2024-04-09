@@ -28,16 +28,31 @@ Use Cases
 
 This file contains a simple benchmark SQL script that demonstrates the
 performance of jsonschema vs [pg_jsonschema]. It requires that each be built
-and installed. To test jsonschema, run:
+and installed. Parameters:
+
+*   `extension`: The extension to test, `jsonschema` or `pg_jsonschema`.
+    If not set there will be no validation.
+*   `iterations`: Number of iterations of the task to run (inserting rowed
+    into a table). Defaults to `200_000`.
+
+ To test jsonschema, run:
 
 ```sh
-psql -Xf eg/bench.sql
+psql -Xf eg/bench.sql --set extension=jsonschema
+
 ```
 
 And to test [pg_jsonschema]:
 
 ```sh
 psql -Xf eg/bench.sql --set extension=pg_jsonschema
+```
+
+Omit the `extension` parameter to see the performance with no schema
+validation:
+
+```sh
+psql -Xf eg/bench.sql
 ```
 
 Set `iterations` to change the number of iterations (defaults to 200,000):

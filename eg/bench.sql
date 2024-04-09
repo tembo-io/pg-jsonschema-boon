@@ -15,11 +15,6 @@
 \unset ECHO
 \pset pager off
 
-\if :{?extension}
-\else
-   \set extension jsonschema
-\endif
-
 \if :{?iterations}
 \else
    \set iterations 200_000
@@ -35,17 +30,30 @@ SELECT '{
     }
 }' AS schema \gset
 
+\if :{?extension}
 CREATE EXTENSION :extension;
+\endif
 
 CREATE TABLE bench_json(
-    meta JSON CHECK (json_matches_schema(:'schema'::json, meta))
+    meta JSON
+\if :{?extension}
+        CHECK (json_matches_schema(:'schema'::json, meta))
+\endif
 );
 
 CREATE TABLE bench_jsonb(
-    meta JSON CHECK (json_matches_schema(:'schema'::json, meta))
+    meta JSON
+\if :{?extension}
+        CHECK (json_matches_schema(:'schema'::json, meta))
+\endif
 );
 
 \timing on
+
+\if :{?extension}
+\else
+    \set extension without
+\endif
 
 \echo
 \echo ######################################################################
@@ -57,7 +65,6 @@ SELECT json_build_object( 'a', i, 'b', i::text )
   FROM generate_series(1, :iterations) t(i);
 
 \echo
-\echo
 \echo ######################################################################
 \echo # Test :extension JSONB validation for :iterations iterations
 \echo ######################################################################
@@ -66,7 +73,5 @@ INSERT INTO bench_jsonb(meta)
 SELECT json_build_object( 'a', i, 'b', i::text )
   FROM generate_series(1, :iterations) t(i);
 
-\echo
-\echo
 \timing off
 ROLLBACK;

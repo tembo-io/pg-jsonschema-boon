@@ -87,8 +87,8 @@ Benchmark
 
 A quick benchmark in [`eg/bench.sql](eg/bench.sql) compares the performance
 for a simple validation a check constraint between the jsonschema and
-[pg_jsonschema]. Example running PostgreSQL 16 on an M3 Max MacBook Pro with
-32G of RAM:
+[pg_jsonschema]. Example testing `pg_jsonschema` with PostgreSQL 16 on an M3
+Max MacBook Pro with 32G of RAM:
 
 ``` console
 $ psql -Xf eg/bench.sql --set extension=pg_jsonschema
@@ -98,13 +98,15 @@ $ psql -Xf eg/bench.sql --set extension=pg_jsonschema
 ######################################################################
 Time: 8170.906 ms (00:08.171)
 
-
 ######################################################################
 # Test pg_jsonschema JSONB validation for 200_000 iterations
 ######################################################################
 Time: 8215.921 ms (00:08.216)
+```
 
+Testing `jsonschema`:
 
+``` console
 $ psql -Xf eg/bench.sql --set extension=jsonschema
 
 ######################################################################
@@ -116,6 +118,22 @@ Time: 3356.828 ms (00:03.357)
 # Test jsonschema JSONB validation for 200_000 iterations
 ######################################################################
 Time: 3428.245 ms (00:03.428)
+```
+
+And a control test with no validation:
+
+``` console
+❯ psql -Xf eg/bench.sql
+
+######################################################################
+# Test without JSON validation for 200_000 iterations
+######################################################################
+Time: 474.688 ms
+
+######################################################################
+# Test without JSONB validation for 200_000 iterations
+######################################################################
+Time: 462.265 ms
 ```
 
 Copyright and License
