@@ -69,9 +69,10 @@ the [prior art](#prior-art)?
     support simple, single-file JSON Schemas, this extension fully supports
     [multi-file schema definition][composition]. This allows multiple smaller
     schemas to be composed into larger, more complicated schemas.
-*   **Performance.** The [boon crate] provides the highest level of schema
-    validation performance. In a [simple test], the jsonschema validates JSON
-    and JSONB objects in a CHECK constraint 2.3x faster than [pg_jsonschema].
+*   **Performance.** The use of Rust provides the highest level of schema
+    validation performance. In a [simple test], the jsonschema extension
+    validates JSON and JSONB objects in a `CHECK` constraint at around 77,000
+    inserts/second.
 
 For many use cases these features aren't necessary. But once schemas become
 more complicated or require more advanced features of the [2020-12 draft],
@@ -413,7 +414,7 @@ Prior Art
 ---------
 
 *   [pg_jsonschema]: JSON Schema Postgres extension written with pgrx +
-    the [jsonschema crate]
+    the [jsonschema crate]; ca. 20-30% faster in a [simple test].
 *   [pgx_json_schema]: Slightly older JSON Schema Postgres extension written
     with pgrx + the [jsonschema crate]
 *   [postgres-json-schema]: JSON Schema Postgres extension written in PL/pgSQL

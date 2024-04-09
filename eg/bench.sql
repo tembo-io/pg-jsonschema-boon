@@ -8,6 +8,10 @@
 --
 --     psql -f eg/bench.sql --set extension=pg_jsonschema --iterations 200_000
 --
+-- And without validation (control):
+--
+--     psql -f eg/bench.sql --iterations 200_000
+--
 -- Borrowed from
 -- https://github.com/supabase/pg_jsonschema?tab=readme-ov-file#benchmark
 
