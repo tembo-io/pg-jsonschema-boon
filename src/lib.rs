@@ -58,14 +58,14 @@ macro_rules! values_for {
 // jsonschema_is_valid(id::text, VARIADIC schema::jsonb)
 
 /// json_schema_is_valid validates `schema`.
-#[pg_extern(immutable, strict, name = "jsonschema_is_valid")]
+#[pg_extern(immutable, strict, parallel_safe, name = "jsonschema_is_valid")]
 fn json_schema_is_valid(schema: Json) -> bool {
     let schemas = [schema.0];
     run_compiles!(id_for!(&schemas[0]), &schemas)
 }
 
 /// jsonb_schema_is_valid validates `schema`.
-#[pg_extern(immutable, strict, name = "jsonschema_is_valid")]
+#[pg_extern(immutable, strict, parallel_safe, name = "jsonschema_is_valid")]
 fn jsonb_schema_is_valid(schema: JsonB) -> bool {
     let schemas = [schema.0];
     run_compiles!(id_for!(&schemas[0]), &schemas)
@@ -73,7 +73,7 @@ fn jsonb_schema_is_valid(schema: JsonB) -> bool {
 
 /// json_schema_id_is_valid validates the schema with the `$id` `id` from the
 /// `schemas`.
-#[pg_extern(immutable, strict, name = "jsonschema_is_valid")]
+#[pg_extern(immutable, strict, parallel_safe, name = "jsonschema_is_valid")]
 fn json_schema_id_is_valid(id: &str, schemas: VariadicArray<Json>) -> bool {
     let schemas = values_for!(schemas);
     run_compiles!(id, &schemas)
@@ -81,7 +81,7 @@ fn json_schema_id_is_valid(id: &str, schemas: VariadicArray<Json>) -> bool {
 
 /// jsonb_schema_id_is_valid validates the schema with the `$id` `id` from the
 /// `schemas`.
-#[pg_extern(immutable, strict, name = "jsonschema_is_valid")]
+#[pg_extern(immutable, strict, parallel_safe, name = "jsonschema_is_valid")]
 fn jsonb_schema_id_is_valid(id: &str, schemas: VariadicArray<JsonB>) -> bool {
     let schemas = values_for!(schemas);
     run_compiles!(id, &schemas)
@@ -95,28 +95,28 @@ fn jsonb_schema_id_is_valid(id: &str, schemas: VariadicArray<JsonB>) -> bool {
 // jsonschema_validates(data::jsonb, schema::json)
 
 /// json_schema_validates_json validates `data` against `schema`.
-#[pg_extern(immutable, strict, name = "jsonschema_validates")]
+#[pg_extern(immutable, strict, parallel_safe, name = "jsonschema_validates")]
 fn json_schema_validates_json(data: Json, schema: Json) -> bool {
     let schemas = [schema.0];
     run_validate!(id_for!(&schemas[0]), &schemas, data.0)
 }
 
 /// jsonb_schema_validates_jsonb validates `data` against `schema`.
-#[pg_extern(immutable, strict, name = "jsonschema_validates")]
+#[pg_extern(immutable, strict, parallel_safe, name = "jsonschema_validates")]
 fn jsonb_schema_validates_jsonb(data: JsonB, schema: JsonB) -> bool {
     let schemas = [schema.0];
     run_validate!(id_for!(&schemas[0]), &schemas, data.0)
 }
 
 /// json_schema_validates_jsonb validates `data` against `schema`.
-#[pg_extern(immutable, strict, name = "jsonschema_validates")]
+#[pg_extern(immutable, strict, parallel_safe, name = "jsonschema_validates")]
 fn json_schema_validates_jsonb(data: Json, schema: JsonB) -> bool {
     let schemas = [schema.0];
     run_validate!(id_for!(&schemas[0]), &schemas, data.0)
 }
 
 /// jsonb_schema_validates_json validates `data` against `schema`.
-#[pg_extern(immutable, strict, name = "jsonschema_validates")]
+#[pg_extern(immutable, strict, parallel_safe, name = "jsonschema_validates")]
 fn jsonb_schema_validates_json(data: JsonB, schema: Json) -> bool {
     let schemas = [schema.0];
     run_validate!(id_for!(&schemas[0]), &schemas, data.0)
@@ -131,7 +131,7 @@ fn jsonb_schema_validates_json(data: JsonB, schema: Json) -> bool {
 
 /// json_schema_id_validates_json validates `data` against the schema with the
 /// `$id` `id` in `schemas`.
-#[pg_extern(immutable, strict, name = "jsonschema_validates")]
+#[pg_extern(immutable, strict, parallel_safe, name = "jsonschema_validates")]
 fn json_schema_id_validates_json(data: Json, id: &str, schemas: VariadicArray<Json>) -> bool {
     let schemas = values_for!(schemas);
     run_validate!(id, &schemas, data.0)
@@ -139,7 +139,7 @@ fn json_schema_id_validates_json(data: Json, id: &str, schemas: VariadicArray<Js
 
 /// jsonb_schema_id_validates_jsonb validates `data` against the schema with
 /// the `$id` `id` in `schemas`.
-#[pg_extern(immutable, strict, name = "jsonschema_validates")]
+#[pg_extern(immutable, strict, parallel_safe, name = "jsonschema_validates")]
 fn jsonb_schema_id_validates_jsonb(data: JsonB, id: &str, schemas: VariadicArray<JsonB>) -> bool {
     let schemas = values_for!(schemas);
     run_validate!(id, &schemas, data.0)
@@ -147,7 +147,7 @@ fn jsonb_schema_id_validates_jsonb(data: JsonB, id: &str, schemas: VariadicArray
 
 /// json_schema_id_validates_jsonb validates `data` against the schema with
 /// the `$id` `id` in `schemas`.
-#[pg_extern(immutable, strict, name = "jsonschema_validates")]
+#[pg_extern(immutable, strict, parallel_safe, name = "jsonschema_validates")]
 fn json_schema_id_validates_jsonb(data: Json, id: &str, schemas: VariadicArray<JsonB>) -> bool {
     let schemas = values_for!(schemas);
     run_validate!(id, &schemas, data.0)
@@ -155,20 +155,20 @@ fn json_schema_id_validates_jsonb(data: Json, id: &str, schemas: VariadicArray<J
 
 /// jsonb_schema_id_validates_json validates `data` against the schema with
 /// the `$id` `id` in `schemas`.
-#[pg_extern(immutable, strict, name = "jsonschema_validates")]
+#[pg_extern(immutable, strict, parallel_safe, name = "jsonschema_validates")]
 fn jsonb_schema_id_validates_json(data: JsonB, id: &str, schemas: VariadicArray<Json>) -> bool {
     let schemas = values_for!(schemas);
     run_validate!(id, &schemas, data.0)
 }
 
 // pg_jsonschema-compatible functions.
-#[pg_extern(immutable, strict)]
+#[pg_extern(immutable, strict, parallel_safe)]
 fn json_matches_schema(schema: Json, instance: Json) -> bool {
     let schemas = [schema.0];
     run_validate!(id_for!(&schemas[0]), &schemas, instance.0)
 }
 
-#[pg_extern(immutable, strict)]
+#[pg_extern(immutable, strict, parallel_safe)]
 fn jsonb_matches_schema(schema: Json, instance: JsonB) -> bool {
     let schemas = [schema.0];
     run_validate!(id_for!(&schemas[0]), &schemas, instance.0)

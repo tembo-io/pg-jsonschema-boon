@@ -9,7 +9,7 @@ keywords = ["jsonschema", "validation", "postgres", "extension", "database", "pg
 license = "MIT"
 categories = ["web-programming", "database"]
 edition = "2021"
-exclude = [ ".github", ".gitattributes", "target" ]
+exclude = [ ".github", ".gitattributes", "target", ".ci", ".vscode", ".gitignore", "META.json.in" ]
 
 [lib]
 crate-type = ["cdylib"]
