@@ -85,7 +85,7 @@ Prior Art
 Benchmark
 ---------
 
-A quick benchmark in [`eg/bench.sql](eg/bench.sql) compares the performance
+A quick benchmark in [`eg/bench.sql`](eg/bench.sql) compares the performance
 for a simple validation a check constraint between the jsonschema and
 [pg_jsonschema]. Example testing `jsonschema` with PostgreSQL 16 on an M3 Max
 MacBook Pro with 32G of RAM:
