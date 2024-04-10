@@ -210,8 +210,8 @@ SELECT '{
   },
   "required": ["first_name", "last_name", "shipping_address", "billing_address"],
   "$defs": {
-    "address": {
-      "$id": "/schemas/address",
+    "https://example.com/schemas/address": {
+      "$id": "https://example.com/schemas/address",
       "type": "object",
       "properties": {
         "street_address": { "type": "string" },
@@ -225,8 +225,8 @@ SELECT '{
 ```
 
 Note that the only change to the address schema is tha it has been embedded in
-the `$defs` object and its `$id` is no longer fully-qualified. Now with this
-one bundled schema, we can omit the `id` parameter:
+the `$defs` object using its `$id` for the key. With this schema bundle, we
+can omit the `id` parameter:
 
 ```psql
 SELECT jsonschema_is_valid(:'cust_schema'::json);

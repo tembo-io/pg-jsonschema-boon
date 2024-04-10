@@ -4,7 +4,7 @@ DISTVERSION  = $(shell perl -nE '/^version\s*=\s*"([^"]+)/ && do { say $$1; exit
 PGRXV        = $(shell perl -nE '/^pgrx\s+=\s"=?([^"]+)/ && do { say $$1; exit }' Cargo.toml)
 PGV          = $(shell perl -E 'shift =~ /(\d+)/ && say $$1' "$(shell $(PG_CONFIG) --version)")
 
-.DEFAULT_GOAL: package # Build jsonshcmea for the PostgreSQL cluster identified by pg_config.
+.DEFAULT_GOAL: package # Build jsonschmea for the PostgreSQL cluster identified by pg_config.
 package:
 	@cargo pgrx package --pg-config "$(PG_CONFIG)"
 
