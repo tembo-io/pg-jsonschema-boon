@@ -1,0 +1,258 @@
+-- Valid
+SELECT jsonschema_validates('{"x": "y"}'::json, '{"type": "object"}'::jsonb);
+ jsonschema_validates 
+----------------------
+ t
+(1 row)
+
+SELECT jsonschema_validates('{"x": "y"}'::jsonb, '{"type": "object"}'::json);
+ jsonschema_validates 
+----------------------
+ t
+(1 row)
+
+-- Invalid json
+SELECT jsonschema_validates('["x", "y"]'::json, '{"type": "object"}'::jsonb);
+INFO:  jsonschema validation failed with file:///schema.json#
+- at '': want object, but got array
+ jsonschema_validates 
+----------------------
+ f
+(1 row)
+
+SELECT jsonschema_validates('["x", "y"]'::jsonb, '{"type": "object"}'::json);
+INFO:  jsonschema validation failed with file:///schema.json#
+- at '': want object, but got array
+ jsonschema_validates 
+----------------------
+ f
+(1 row)
+
+-- Invalid schema
+SELECT jsonschema_validates('{"x": "y"}'::json, '{"type": "nonesuch"}'::jsonb);
+ERROR:  file:///schema.json is not valid against metaschema: jsonschema validation failed with https://json-schema.org/draft/2020-12/schema#
+- at '/type': anyOf failed
+  - at '/type': value must be one of 'array', 'boolean', 'integer', 'null', 'number', 'object', 'string'
+  - at '/type': want array, but got string
+SELECT jsonschema_validates('{"x": "y"}'::jsonb, '{"type": "nonesuch"}'::json);
+ERROR:  file:///schema.json is not valid against metaschema: jsonschema validation failed with https://json-schema.org/draft/2020-12/schema#
+- at '/type': anyOf failed
+  - at '/type': value must be one of 'array', 'boolean', 'integer', 'null', 'number', 'object', 'string'
+  - at '/type': want array, but got string
+-- NULL schema
+SELECT jsonschema_validates('{"x": "y"}'::json, NULL::jsonb);
+ jsonschema_validates 
+----------------------
+ 
+(1 row)
+
+SELECT jsonschema_validates('{"x": "y"}'::jsonb, NULL::json);
+ jsonschema_validates 
+----------------------
+ 
+(1 row)
+
+-- NULL JSON
+SELECT jsonschema_validates(NULL::json, '{"type": "object"}'::jsonb);
+ jsonschema_validates 
+----------------------
+ 
+(1 row)
+
+SELECT jsonschema_validates(NULL::jsonb, '{"type": "object"}'::json);
+ jsonschema_validates 
+----------------------
+ 
+(1 row)
+
+-- Load schemas
+\set addr_schema `cat eg/address.schema.json`
+\set user_schema `cat eg/user-profile.schema.json`
+SELECT :'addr_schema'::json ->> '$id' AS addr_schema_id \gset
+SELECT :'user_schema'::json ->> '$id' AS user_schema_id \gset
+-- Load objects
+SELECT '{
+  "postOfficeBox": "123",
+  "streetAddress": "456 Main St",
+  "locality": "Big City",
+  "region": "State",
+  "postalCode": "12345",
+  "countryName": "Country"
+}' AS address \gset
+SELECT '{
+  "username": "user123",
+  "email": "user@example.com",
+  "fullName": "John Doe",
+  "age": 30,
+  "interests": ["Travel", "Technology"],
+  "address": {
+    "locality": "Big City",
+    "region": "State",
+    "countryName": "Country"
+  }
+}' AS user \gset
+-- Valid address
+SELECT jsonschema_validates(:'address'::json, :'addr_schema_id', :'addr_schema'::json);
+ jsonschema_validates 
+----------------------
+ t
+(1 row)
+
+SELECT jsonschema_validates(:'address'::json, :'addr_schema_id', :'addr_schema'::jsonb);
+ jsonschema_validates 
+----------------------
+ t
+(1 row)
+
+SELECT jsonschema_validates(:'address'::jsonb, :'addr_schema_id', :'addr_schema'::jsonb);
+ jsonschema_validates 
+----------------------
+ t
+(1 row)
+
+SELECT jsonschema_validates(:'address'::jsonb, :'addr_schema_id', :'addr_schema'::json);
+ jsonschema_validates 
+----------------------
+ t
+(1 row)
+
+-- Valid user
+SELECT jsonschema_validates(:'user'::json, :'user_schema_id', :'addr_schema'::json, :'user_schema'::json );
+ jsonschema_validates 
+----------------------
+ t
+(1 row)
+
+SELECT jsonschema_validates(:'user'::json, :'user_schema_id', :'addr_schema'::jsonb, :'user_schema'::jsonb );
+ jsonschema_validates 
+----------------------
+ t
+(1 row)
+
+SELECT jsonschema_validates(:'user'::jsonb, :'user_schema_id', :'addr_schema'::jsonb, :'user_schema'::jsonb );
+ jsonschema_validates 
+----------------------
+ t
+(1 row)
+
+SELECT jsonschema_validates(:'user'::jsonb, :'user_schema_id', :'addr_schema'::json, :'user_schema'::json );
+ jsonschema_validates 
+----------------------
+ t
+(1 row)
+
+-- Variadic
+SELECT jsonschema_validates(:'user'::json, :'user_schema_id', VARIADIC ARRAY[:'addr_schema', :'user_schema']::json[] );
+ jsonschema_validates 
+----------------------
+ t
+(1 row)
+
+SELECT jsonschema_validates(:'user'::json, :'user_schema_id', VARIADIC ARRAY[:'addr_schema', :'user_schema']::jsonb[] );
+ jsonschema_validates 
+----------------------
+ t
+(1 row)
+
+SELECT jsonschema_validates(:'user'::jsonb, :'user_schema_id', VARIADIC ARRAY[:'addr_schema', :'user_schema']::jsonb[] );
+ jsonschema_validates 
+----------------------
+ t
+(1 row)
+
+SELECT jsonschema_validates(:'user'::jsonb, :'user_schema_id', VARIADIC ARRAY[:'addr_schema', :'user_schema']::json[] );
+ jsonschema_validates 
+----------------------
+ t
+(1 row)
+
+-- Invalid User
+\set invalid_user '{"username": "hello"}'
+SELECT jsonschema_validates(:'invalid_user'::json, :'user_schema_id', :'addr_schema'::json, :'user_schema'::json );
+INFO:  jsonschema validation failed with https://example.com/user-profile.schema.json#
+- at '': missing properties 'email'
+ jsonschema_validates 
+----------------------
+ f
+(1 row)
+
+SELECT jsonschema_validates(:'invalid_user'::json, :'user_schema_id', :'addr_schema'::jsonb, :'user_schema'::jsonb );
+INFO:  jsonschema validation failed with https://example.com/user-profile.schema.json#
+- at '': missing properties 'email'
+ jsonschema_validates 
+----------------------
+ f
+(1 row)
+
+SELECT jsonschema_validates(:'invalid_user'::jsonb, :'user_schema_id', :'addr_schema'::jsonb, :'user_schema'::jsonb );
+INFO:  jsonschema validation failed with https://example.com/user-profile.schema.json#
+- at '': missing properties 'email'
+ jsonschema_validates 
+----------------------
+ f
+(1 row)
+
+SELECT jsonschema_validates(:'invalid_user'::jsonb, :'user_schema_id', :'addr_schema'::json, :'user_schema'::json );
+INFO:  jsonschema validation failed with https://example.com/user-profile.schema.json#
+- at '': missing properties 'email'
+ jsonschema_validates 
+----------------------
+ f
+(1 row)
+
+-- Invalid schema
+\set invalid_schema '{"type": "nonesuch", "$id": "file:///lol.json"}'
+SELECT jsonschema_validates(:'user'::json, :'user_schema_id', :'invalid_schema'::json, :'user_schema'::json );
+ERROR:  file:///lol.json is not valid against metaschema: jsonschema validation failed with https://json-schema.org/draft/2020-12/schema#
+- at '/type': anyOf failed
+  - at '/type': value must be one of 'array', 'boolean', 'integer', 'null', 'number', 'object', 'string'
+  - at '/type': want array, but got string
+SELECT jsonschema_validates(:'user'::json, :'user_schema_id', :'invalid_schema'::jsonb, :'user_schema'::jsonb );
+ERROR:  file:///lol.json is not valid against metaschema: jsonschema validation failed with https://json-schema.org/draft/2020-12/schema#
+- at '/type': anyOf failed
+  - at '/type': value must be one of 'array', 'boolean', 'integer', 'null', 'number', 'object', 'string'
+  - at '/type': want array, but got string
+SELECT jsonschema_validates(:'user'::jsonb, :'user_schema_id', :'invalid_schema'::jsonb, :'user_schema'::jsonb );
+ERROR:  file:///lol.json is not valid against metaschema: jsonschema validation failed with https://json-schema.org/draft/2020-12/schema#
+- at '/type': anyOf failed
+  - at '/type': value must be one of 'array', 'boolean', 'integer', 'null', 'number', 'object', 'string'
+  - at '/type': want array, but got string
+SELECT jsonschema_validates(:'user'::jsonb, :'user_schema_id', :'invalid_schema'::json, :'user_schema'::json );
+ERROR:  file:///lol.json is not valid against metaschema: jsonschema validation failed with https://json-schema.org/draft/2020-12/schema#
+- at '/type': anyOf failed
+  - at '/type': value must be one of 'array', 'boolean', 'integer', 'null', 'number', 'object', 'string'
+  - at '/type': want array, but got string
+-- NULL schema
+SELECT jsonschema_validates(:'address'::json, :'addr_schema_id', NULL::json);
+ERROR:  array contains NULL
+SELECT jsonschema_validates(:'address'::json, :'addr_schema_id', NULL::jsonb);
+ERROR:  array contains NULL
+SELECT jsonschema_validates(:'address'::jsonb, :'addr_schema_id', NULL::jsonb);
+ERROR:  array contains NULL
+SELECT jsonschema_validates(:'address'::jsonb, :'addr_schema_id', NULL::json);
+ERROR:  array contains NULL
+-- NULL JSON
+SELECT jsonschema_validates(NULL::json, :'addr_schema_id', :'addr_schema'::json);
+ jsonschema_validates 
+----------------------
+ 
+(1 row)
+
+SELECT jsonschema_validates(NULL::json, :'addr_schema_id', :'addr_schema'::jsonb);
+ jsonschema_validates 
+----------------------
+ 
+(1 row)
+
+SELECT jsonschema_validates(NULL::jsonb, :'addr_schema_id', :'addr_schema'::jsonb);
+ jsonschema_validates 
+----------------------
+ 
+(1 row)
+
+SELECT jsonschema_validates(NULL::jsonb, :'addr_schema_id', :'addr_schema'::json);
+ jsonschema_validates 
+----------------------
+ 
+(1 row)
+

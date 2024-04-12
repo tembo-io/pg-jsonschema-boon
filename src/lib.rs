@@ -2,6 +2,7 @@ use boon::{CompileError, Compiler, Schemas};
 use pgrx::prelude::*;
 use pgrx::{Json, JsonB, VariadicArray};
 use serde_json::Value;
+use std::error::Error;
 
 pgrx::pg_module_magic!();
 
@@ -24,7 +25,7 @@ macro_rules! run_compiles {
     ($x:expr, $y:expr) => {
         match compiles($x, $y) {
             Err(e) => {
-                info!("{e}");
+                info!("{e:#}");
                 false
             }
             Ok(()) => true,
@@ -36,7 +37,7 @@ macro_rules! run_compiles {
 macro_rules! run_validate {
     ($x:expr, $y:expr, $z:expr) => {
         match validate($x, $y, $z) {
-            Err(e) => error!("{e}"),
+            Err(e) => error!("{e:#}"),
             Ok(ok) => ok,
         }
     };
@@ -236,6 +237,8 @@ extern "C" fn _PG_init() {
 fn new_compiler(id: &str, schemas: &[Value]) -> Result<Compiler, CompileError> {
     let mut compiler = Compiler::new();
     compiler.set_default_draft(GUC.get().into());
+    // Replace file loader to prevent boon from accessing the file system.
+    compiler.register_url_loader("file", Box::new(FailLoader));
 
     for (i, s) in schemas.iter().enumerate() {
         let sid = if let Value::String(s) = &s["$id"] {
@@ -288,6 +291,18 @@ fn validate(id: &str, schemas: &[Value], instance: Value) -> Result<bool, Compil
                 }
             }
         }
+    }
+}
+
+// FailLoader always fails to load the URL for its scheme. Used to replace the
+// default "file" loader to prevent boon from trying to read the file system.
+struct FailLoader;
+
+impl boon::UrlLoader for FailLoader {
+    fn load(&self, url: &str) -> Result<Value, Box<dyn Error>> {
+        Err(Box::new(boon::CompileError::UnsupportedUrlScheme {
+            url: url.to_string(),
+        }))
     }
 }
 
@@ -387,7 +402,23 @@ mod tests {
 
         // But no more.
         let mut schemas = Schemas::new();
-        assert!(c.compile("file:test.json2", &mut schemas).is_err());
+        let err = c.compile("file:test.json2", &mut schemas);
+        assert!(err.is_err());
+
+        // Should not have attempted to read the file from the file system.
+        if let Err(e) = err {
+            assert!(e.source().is_some());
+            if let Some(e) = e.source() {
+                // We should have the unsupported scheme error from FailLoader.
+                assert_eq!("unsupported scheme in file:///test.json2", format!("{e}"));
+            } else {
+                // Shouldn't happen
+                unreachable!();
+            }
+        } else {
+            // Shouldn't happen
+            unreachable!();
+        }
 
         // Test an invalid draft.
         assert!(new_compiler(&id, &[json!({"$schema": "lol"})]).is_err());
@@ -486,7 +517,7 @@ mod tests {
 
     #[pg_test]
     fn test_jsonschema_is_valid() {
-        assert!(crate::json_schema_is_valid(Json(json!({"type": "object"})),));
+        assert!(crate::json_schema_is_valid(Json(json!({"type": "object"}))));
         assert!(crate::jsonb_schema_is_valid(JsonB(
             json!({"type": "object"})
         )));
@@ -627,7 +658,7 @@ mod tests {
             .catch_when(PgSqlErrorCode::ERRCODE_INTERNAL_ERROR, |e| {
                 if let PostgresError(e) = e {
                     assert_eq!(
-                        "file:///schema.json is not valid against metaschema",
+                        "file:///schema.json is not valid against metaschema: jsonschema validation failed with https://json-schema.org/draft/2020-12/schema#\n- at '/type': anyOf failed\n  - at '/type': value must be one of 'array', 'boolean', 'integer', 'null', 'number', 'object', 'string'\n  - at '/type': want array, but got string",
                         e.message(),
                     );
                 }
@@ -693,7 +724,7 @@ mod tests {
                 .catch_when(PgSqlErrorCode::ERRCODE_INTERNAL_ERROR, |e| {
                     if let PostgresError(e) = e {
                         assert_eq!(
-                            "file:///schema.json is not valid against metaschema",
+                            "file:///schema.json is not valid against metaschema: jsonschema validation failed with https://json-schema.org/draft/2020-12/schema#\n- at '/type': anyOf failed\n  - at '/type': value must be one of 'array', 'boolean', 'integer', 'null', 'number', 'object', 'string'\n  - at '/type': want array, but got string",
                             e.message(),
                         );
                     }
@@ -811,7 +842,7 @@ mod tests {
                 .catch_when(PgSqlErrorCode::ERRCODE_INTERNAL_ERROR, |e| {
                     if let PostgresError(e) = e {
                         assert_eq!(
-                            "file:///lol.json is not valid against metaschema",
+                            "file:///lol.json is not valid against metaschema: jsonschema validation failed with https://json-schema.org/draft/2020-12/schema#\n- at '/type': anyOf failed\n  - at '/type': value must be one of 'array', 'boolean', 'integer', 'null', 'number', 'object', 'string'\n  - at '/type': want array, but got string",
                             e.message(),
                         );
                     }

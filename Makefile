@@ -3,6 +3,15 @@ DISTNAME     = $(shell perl -nE '/^name\s*=\s*"([^"]+)/ && do { say $$1; exit }'
 DISTVERSION  = $(shell perl -nE '/^version\s*=\s*"([^"]+)/ && do { say $$1; exit }' Cargo.toml)
 PGRXV        = $(shell perl -nE '/^pgrx\s+=\s"=?([^"]+)/ && do { say $$1; exit }' Cargo.toml)
 PGV          = $(shell perl -E 'shift =~ /(\d+)/ && say $$1' "$(shell $(PG_CONFIG) --version)")
+EXTRA_CLEAN  = META.json $(DISTNAME)-$(DISTVERSION).zip target
+TESTS        = $(wildcard test/sql/*.sql)
+REGRESS      = $(patsubst test/sql/%.sql,%,$(TESTS))
+REGRESS_OPTS = --inputdir=test --load-extension=$(DISTNAME) --outputdir=target/installcheck
+
+PGXS := $(shell $(PG_CONFIG) --pgxs)
+include $(PGXS)
+
+all: package
 
 .DEFAULT_GOAL: package # Build jsonschmea for the PostgreSQL cluster identified by pg_config.
 package:
@@ -15,9 +24,6 @@ install:
 .PHONY: test # Run the full test suite against the PostgreSQL version identified by pg_config.
 test:
 	@cargo test --all --no-default-features --features "pg$(PGV) pg_test" -- --nocapture
-
-.PHONY: installcheck # An alias for the test target for PGXS compatability.
-installcheck: test
 
 .PHONY: cover # Run cover tests and generate & open a report.
 cover:
@@ -35,21 +41,23 @@ pg-version: Cargo.toml
 install-pgrx: Cargo.toml
 	@cargo install --locked cargo-pgrx --version "$(PGRXV)"
 
+.PHONY: pgrx-init # Initialize pgrx for the PostgreSQL version identified by pg_config.
 pgrx-init: Cargo.toml
 	@cargo pgrx init "--pg$(PGV)"="$(PG_CONFIG)"
 
+.PHONY: lint # Format and lint.
 lint:
 	@cargo fmt --all --check
 	@cargo clippy --features "pg$(PGV)" --no-default-features
 
-## clean: Remove build artifacts and intermediate files.
-clean: target
-	@cargo clean
-	@rm -rf META.json $(DISTNAME)-$(DISTVERSION).zip
-
 # Create the PGXN META.json file.
 META.json: META.json.in Cargo.toml
 	@sed "s/@CARGO_VERSION@/$(DISTVERSION)/g" $< > $@
+
+# Expected test output regeneration
+target/installcheck/results/%.out: installcheck
+test/expected/%.out: target/installcheck/results/%.out
+	@cp $^ $@
 
 # Create a PGXN-compatible zip file.
 $(DISTNAME)-$(DISTVERSION).zip: META.json

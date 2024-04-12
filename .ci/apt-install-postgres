@@ -16,10 +16,12 @@ apt-get update
 apt-get install -y --no-install-recommends \
         build-essential clang llvm llvm-dev llvm-runtime cmake \
         ca-certificates gnupg2 curl libicu-dev libxml2 locales ssl-cert libxml2-utils
-apt-get -y purge postgresql-client-common
+apt-get -y purge postgres*
 
 curl https://salsa.debian.org/postgresql/postgresql-common/-/raw/master/pgdg/apt.postgresql.org.sh -O --output-dir  /usr/local/bin/
 chmod +x /usr/local/bin/apt.postgresql.org.sh
 
 apt.postgresql.org.sh -i -v "$PGVERSION"
 chmod a+rwx "$(pg_config --pkglibdir)" "$(pg_config --sharedir)/extension"
+
+pg_createcluster --start "$PGVERSION" test -p "${PGPORT:-5433}" -- -A trust || true

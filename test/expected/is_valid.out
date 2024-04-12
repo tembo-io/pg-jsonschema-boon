@@ -1,0 +1,130 @@
+-- Valid schema
+SELECT jsonschema_is_valid('{"type": "object"}'::json);
+ jsonschema_is_valid 
+---------------------
+ t
+(1 row)
+
+SELECT jsonschema_is_valid('{"type": "object"}'::jsonb);
+ jsonschema_is_valid 
+---------------------
+ t
+(1 row)
+
+-- Invalid schema
+SELECT jsonschema_is_valid('["not a schema"]'::json);
+INFO:  file:///schema.json is not valid against metaschema: jsonschema validation failed with https://json-schema.org/draft/2020-12/schema#
+- at '': want boolean or object, but got array
+ jsonschema_is_valid 
+---------------------
+ f
+(1 row)
+
+SELECT jsonschema_is_valid('["not a schema"]'::jsonb);
+INFO:  file:///schema.json is not valid against metaschema: jsonschema validation failed with https://json-schema.org/draft/2020-12/schema#
+- at '': want boolean or object, but got array
+ jsonschema_is_valid 
+---------------------
+ f
+(1 row)
+
+-- NULLs
+SELECT jsonschema_is_valid(NULL::json);
+ jsonschema_is_valid 
+---------------------
+ 
+(1 row)
+
+SELECT jsonschema_is_valid(NULL::jsonb);
+ jsonschema_is_valid 
+---------------------
+ 
+(1 row)
+
+-- Load schemas
+\set addr_schema `cat eg/address.schema.json`
+\set user_schema `cat eg/user-profile.schema.json`
+SELECT :'addr_schema'::json ->> '$id' AS addr_schema_id \gset
+SELECT :'user_schema'::json ->> '$id' AS user_schema_id \gset
+-- Single named schema
+SELECT jsonschema_is_valid(:'addr_schema_id', :'addr_schema'::json);
+ jsonschema_is_valid 
+---------------------
+ t
+(1 row)
+
+SELECT jsonschema_is_valid(:'addr_schema_id', :'addr_schema'::jsonb);
+ jsonschema_is_valid 
+---------------------
+ t
+(1 row)
+
+-- Multiple schema
+SELECT jsonschema_is_valid(:'user_schema_id', :'addr_schema'::json, :'user_schema'::json);
+ jsonschema_is_valid 
+---------------------
+ t
+(1 row)
+
+SELECT jsonschema_is_valid(:'user_schema_id', :'addr_schema'::jsonb, :'user_schema'::jsonb);
+ jsonschema_is_valid 
+---------------------
+ t
+(1 row)
+
+-- Variadic array
+SELECT jsonschema_is_valid(:'user_schema_id', VARIADIC ARRAY[:'addr_schema', :'user_schema']::json[]);
+ jsonschema_is_valid 
+---------------------
+ t
+(1 row)
+
+SELECT jsonschema_is_valid(:'user_schema_id', VARIADIC ARRAY[:'addr_schema', :'user_schema']::jsonb[]);
+ jsonschema_is_valid 
+---------------------
+ t
+(1 row)
+
+-- Invalid
+SELECT jsonschema_is_valid('file:///foo', :'addr_schema'::json);
+INFO:  error loading file:///foo: unsupported scheme in file:///foo
+ jsonschema_is_valid 
+---------------------
+ f
+(1 row)
+
+SELECT jsonschema_is_valid('file:///bar', :'addr_schema'::jsonb);
+INFO:  error loading file:///bar: unsupported scheme in file:///bar
+ jsonschema_is_valid 
+---------------------
+ f
+(1 row)
+
+-- Default ID
+SELECT jsonschema_is_valid('nonesuch', '{"type": "object"}'::json);
+ jsonschema_is_valid 
+---------------------
+ t
+(1 row)
+
+SELECT jsonschema_is_valid('nonesuch', '{"type": "object"}'::jsonb);
+ jsonschema_is_valid 
+---------------------
+ t
+(1 row)
+
+-- No such ID
+SELECT jsonschema_is_valid('file:///nonesuch', :'addr_schema'::json);
+INFO:  error loading file:///nonesuch: unsupported scheme in file:///nonesuch
+ jsonschema_is_valid 
+---------------------
+ f
+(1 row)
+
+SELECT jsonschema_is_valid('file:///nonesuch', :'addr_schema'::jsonb);
+INFO:  error loading file:///nonesuch: unsupported scheme in file:///nonesuch
+ jsonschema_is_valid 
+---------------------
+ f
+(1 row)
+

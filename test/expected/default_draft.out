@@ -1,0 +1,112 @@
+-- Make sure the DSO is loaded.
+SELECT jsonschema_is_valid('{"type": "object"}'::json);
+ jsonschema_is_valid 
+---------------------
+ t
+(1 row)
+
+-- Should default to 2020
+SELECT current_setting('jsonschema.default_draft');
+ current_setting 
+-----------------
+ V2020
+(1 row)
+
+SHOW jsonschema.default_draft;
+ jsonschema.default_draft 
+--------------------------
+ V2020
+(1 row)
+
+-- Set to 2019
+SELECT set_config('jsonschema.default_draft', 'V2019', false);
+ set_config 
+------------
+ V2019
+(1 row)
+
+SELECT current_setting('jsonschema.default_draft');
+ current_setting 
+-----------------
+ V2019
+(1 row)
+
+SHOW jsonschema.default_draft;
+ jsonschema.default_draft 
+--------------------------
+ V2019
+(1 row)
+
+-- Set to v7
+SELECT set_config('jsonschema.default_draft', 'V7', false);
+ set_config 
+------------
+ V7
+(1 row)
+
+SELECT current_setting('jsonschema.default_draft');
+ current_setting 
+-----------------
+ V7
+(1 row)
+
+SHOW jsonschema.default_draft;
+ jsonschema.default_draft 
+--------------------------
+ V7
+(1 row)
+
+-- Set to v6
+SELECT set_config('jsonschema.default_draft', 'V6', false);
+ set_config 
+------------
+ V6
+(1 row)
+
+SELECT current_setting('jsonschema.default_draft');
+ current_setting 
+-----------------
+ V6
+(1 row)
+
+SHOW jsonschema.default_draft;
+ jsonschema.default_draft 
+--------------------------
+ V6
+(1 row)
+
+-- Set to v4
+SELECT set_config('jsonschema.default_draft', 'V4', false);
+ set_config 
+------------
+ V4
+(1 row)
+
+SELECT current_setting('jsonschema.default_draft');
+ current_setting 
+-----------------
+ V4
+(1 row)
+
+SHOW jsonschema.default_draft;
+ jsonschema.default_draft 
+--------------------------
+ V4
+(1 row)
+
+-- Set to invalid value
+SELECT set_config('jsonschema.default_draft', 'Nope', false);
+ERROR:  invalid value for parameter "jsonschema.default_draft": "Nope"
+HINT:  Available values: V4, V6, V7, V2019, V2020.
+SELECT current_setting('jsonschema.default_draft');
+ current_setting 
+-----------------
+ V4
+(1 row)
+
+SHOW jsonschema.default_draft;
+ jsonschema.default_draft 
+--------------------------
+ V4
+(1 row)
+

@@ -1,0 +1,68 @@
+--  pg_jsonschema-compatible functions
+-- Valid JSON
+SELECT json_matches_schema('{"type": "object"}', '{"hi": "there"}');
+ json_matches_schema 
+---------------------
+ t
+(1 row)
+
+SELECT jsonb_matches_schema('{"type": "object"}', '{"hi": "there"}');
+ jsonb_matches_schema 
+----------------------
+ t
+(1 row)
+
+-- Invalid JSON
+SELECT json_matches_schema('{"type": "object"}', '["not an object"]');
+INFO:  jsonschema validation failed with file:///schema.json#
+- at '': want object, but got array
+ json_matches_schema 
+---------------------
+ f
+(1 row)
+
+SELECT jsonb_matches_schema('{"type": "object"}', '["not an object"]');
+INFO:  jsonschema validation failed with file:///schema.json#
+- at '': want object, but got array
+ jsonb_matches_schema 
+----------------------
+ f
+(1 row)
+
+-- Invalid schema
+SELECT json_matches_schema('{"type": "nonesuch"}', '{"x": "y"}');
+ERROR:  file:///schema.json is not valid against metaschema: jsonschema validation failed with https://json-schema.org/draft/2020-12/schema#
+- at '/type': anyOf failed
+  - at '/type': value must be one of 'array', 'boolean', 'integer', 'null', 'number', 'object', 'string'
+  - at '/type': want array, but got string
+SELECT jsonb_matches_schema('{"type": "nonesuch"}', '{"x": "y"}');
+ERROR:  file:///schema.json is not valid against metaschema: jsonschema validation failed with https://json-schema.org/draft/2020-12/schema#
+- at '/type': anyOf failed
+  - at '/type': value must be one of 'array', 'boolean', 'integer', 'null', 'number', 'object', 'string'
+  - at '/type': want array, but got string
+-- NULL instance
+SELECT json_matches_schema('{"type": "object"}', NULL);
+ json_matches_schema 
+---------------------
+ 
+(1 row)
+
+SELECT jsonb_matches_schema('{"type": "object"}', NULL);
+ jsonb_matches_schema 
+----------------------
+ 
+(1 row)
+
+-- NULL schema
+SELECT json_matches_schema(NULL, '{"x": "y"}');
+ json_matches_schema 
+---------------------
+ 
+(1 row)
+
+SELECT jsonb_matches_schema(NULL, '{"x": "y"}');
+ jsonb_matches_schema 
+----------------------
+ 
+(1 row)
+
