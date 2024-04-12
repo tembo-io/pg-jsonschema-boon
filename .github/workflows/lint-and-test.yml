@@ -20,13 +20,11 @@ jobs:
       - name: Install Postgres
         run: sudo ./.ci/apt-install-postgres ${{ env.PGVERSION }}
       - name: Install pgrx
-        run: cargo install cargo-pgrx --locked --version "$(make pgrx-version)"
+        run: make install-pgrx
       - name: Initialize pgrx
-        run: cargo pgrx init --pg${{ env.PGVERSION }}="$(which pg_config)"
-      - name: Cargo format
-        run: cargo fmt --all --check
-      - name: Clippy
-        run: cargo clippy --features pg${{ env.PGVERSION }} --no-default-features
+        run: make pgrx-init
+      - name: Format and Lint
+        run: make lint
       - name: Generate Coverage
         env: { RUST_BACKTRACE: 1, PGUSER: postgres }
         run: make cover
@@ -56,13 +54,13 @@ jobs:
       - name: Setup Rust Cache
         uses: Swatinem/rust-cache@v2
       - name: Install pgrx
-        run: cargo install cargo-pgrx --locked --version "$(make pgrx-version)"
+        run: make install-pgrx
       - name: Remove Data Diretory
         run: rm -rf target/pgrx-test-data-${{ matrix.pg }}
       - name: Initialize pgrx
-        run: cargo pgrx init --pg${{ matrix.pg }}="$(which pg_config)"
+        run: make pgrx-init
       - name: Run the tests
         env: { RUST_BACKTRACE: 1, PGUSER: postgres }
-        run: cargo test --all --no-default-features --features "pg${{ matrix.pg }} pg_test" -- --nocapture
+        run: make test
       - name: Remove Data Diretory
         run: rm -rf target/pgrx-test-data-${{ matrix.pg }}

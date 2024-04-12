@@ -16,8 +16,8 @@ install:
 test:
 	@cargo test --all --no-default-features --features "pg$(PGV) pg_test" -- --nocapture
 
-.PHONY: install-check # An alias for the test target for PGXS compatability.
-install-check: test
+.PHONY: installcheck # An alias for the test target for PGXS compatability.
+installcheck: test
 
 .PHONY: cover # Run cover tests and generate & open a report.
 cover:
@@ -34,6 +34,13 @@ pg-version: Cargo.toml
 .PHONY: install-pgrx # Install the version of PGRX specified in Cargo.toml.
 install-pgrx: Cargo.toml
 	@cargo install --locked cargo-pgrx --version "$(PGRXV)"
+
+pgrx-init: Cargo.toml
+	@cargo pgrx init "--pg$(PGV)"="$(PG_CONFIG)"
+
+lint:
+	@cargo fmt --all --check
+	@cargo clippy --features "pg$(PGV)" --no-default-features
 
 ## clean: Remove build artifacts and intermediate files.
 clean: target
