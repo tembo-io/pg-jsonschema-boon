@@ -8,10 +8,10 @@ JSON Schema Postgres Extension
 
 **[Change Log](CHANGELOG.md)** | **[Documentation](doc/jsonschema.md)**
 
-This library provides the `jsonschema` extension for validating JSON and JSONB
-against a [JSON Schema] in Postgres. It supports the following [specification
-drafts] as validated by the [JSON-Schema-Test-Suite] excluding optional
-features:
+This package provides the `jsonschema` extension for validating JSON and JSONB
+against a [JSON Schema] in Postgres. It relies on the [boon] crate, and
+therefore supports the following [specification drafts] as validated by the
+[JSON-Schema-Test-Suite] excluding optional features:
 
 *   [![draft 4 badge]][draft 4 report]
 *   [![draft 6 badge]][draft 6 report]

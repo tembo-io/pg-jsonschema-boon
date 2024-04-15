@@ -7,3 +7,4 @@ Cargo.lock
 .vscode/
 META.json
 jsonschema-*
+vendor/

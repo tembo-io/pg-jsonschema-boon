@@ -68,3 +68,7 @@ pgxn-zip: $(DISTNAME)-$(DISTVERSION).zip
 
 target/release-notes.md: CHANGELOG.md .ci/mknotes
 	@./.ci/mknotes -v $(DISTVERSION) -f $< -r https://github.com/$(or $(GITHUB_REPOSITORY),tembo-io/pg-jsonschema) -o $@
+
+## vendor: Vendor all crates.io and git dependencies.
+vendor:
+	@cargo vendor
