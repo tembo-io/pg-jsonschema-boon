@@ -455,8 +455,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
   [JSON Schema]: https://json-schema.org
-  [GitHub repository]: https://github.com/tembo-io/pg-jsonschema
-  [GitHub Issues]: https://github.com/tembo-io/pg-jsonschema/issues/
+  [GitHub repository]: https://github.com/tembo-io/pg-jsonschema-boon
+  [GitHub Issues]: https://github.com/tembo-io/pg-jsonschema-boon/issues/
   [spec]: https://json-schema.org/specification
   [draft 4 badge]: https://img.shields.io/endpoint?url=https://bowtie.report/badges/rust-boon/compliance/draft4.json
   [draft 4 report]: https://bowtie.report/#/dialects/draft4 "boon draft 4 report"
@@ -472,7 +472,7 @@ SOFTWARE.
   [2020-12 draft]: https://json-schema.org/draft/2020-12/release-notes "JSON Schema: 2020-12 Release Notes"
   [composition]: https://json-schema.org/understanding-json-schema/structuring
     "JSON Schema: Structuring a complex schema"
-  [simple test]: https://github.com/tembo-io/pg-jsonschema/#benchmark
+  [simple test]: https://github.com/tembo-io/pg-jsonschema-boon/#benchmark
   [psql]: https://www.postgresql.org/docs/current/app-psql.html "PostgreSQL Docs: psql"
   [bundle]: https://json-schema.org/understanding-json-schema/structuring#bundling
   [`$schema` field]: https://json-schema.org/draft/2020-12/json-schema-core#name-the-schema-keyword

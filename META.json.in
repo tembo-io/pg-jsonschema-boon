@@ -25,11 +25,11 @@
    },
    "resources": {
       "bugtracker": {
-         "web": "https://github.com/tembo-io/pg-jsonschema/issues/"
+         "web": "https://github.com/tembo-io/pg-jsonschema-boon/issues/"
       },
       "repository": {
-         "url": "git://github.com/tembo-io/pg-jsonschema.git",
-         "web": "https://github.com/tembo-io/pg-jsonschema/",
+         "url": "git://github.com/tembo-io/pg-jsonschema-boon.git",
+         "web": "https://github.com/tembo-io/pg-jsonschema-boon/",
          "type": "git"
       }
    },

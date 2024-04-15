@@ -31,11 +31,11 @@ The theme of this release is *learning Rust and pgrx.*
 *   Performance [benchmark script]
 *   Multi-schema [composition example]
 
-  [v0.1.0]: https://github.com/tembo-io/pg-jsonschema/compare/34d5d49...HEAD
+  [v0.1.0]: https://github.com/tembo-io/pg-jsonschema-boon/compare/34d5d49...HEAD
   [boon]: https://github.com/santhosh-tekuri/boon
-  [README]: https://github.com/tembo-io/pg-jsonschema/blob/v0.1.0/README.md
+  [README]: https://github.com/tembo-io/pg-jsonschema-boon/blob/v0.1.0/README.md
   [PGXN]: https://pgxn.org/dist/jsonschema/
-  [GitHub]: https://github.com/tembo-io/pg-jsonschema/releases
-  [reference documentation]: https://github.com/tembo-io/pg-jsonschema/blob/v0.1.0/doc/jsonschema.md
-  [benchmark script]: https://github.com/tembo-io/pg-jsonschema/blob/v0.1.0/eg/bench.sql
-  [composition example]: https://github.com/tembo-io/pg-jsonschema/blob/v0.1.0/eg/user.sql
+  [GitHub]: https://github.com/tembo-io/pg-jsonschema-boon/releases
+  [reference documentation]: https://github.com/tembo-io/pg-jsonschema-boon/blob/v0.1.0/doc/jsonschema.md
+  [benchmark script]: https://github.com/tembo-io/pg-jsonschema-boon/blob/v0.1.0/eg/bench.sql
+  [composition example]: https://github.com/tembo-io/pg-jsonschema-boon/blob/v0.1.0/eg/user.sql

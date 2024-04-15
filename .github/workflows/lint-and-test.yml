@@ -31,7 +31,7 @@ jobs:
         uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          slug: tembo-io/pg-jsonschema
+          slug: tembo-io/pg-jsonschema-boon
           files: target/cover/cobertura.xml
       - name: Remove Data Diretory
         run: rm -rf target/pgrx-test-data-${{ env.PGVERSION }}

@@ -3,8 +3,8 @@ JSON Schema Postgres Extension
 
 [![MIT License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT "⚖️ MIT License")
 [![PGXN Version](https://badge.fury.io/pg/jsonschema.svg)](https://badge.fury.io/pg/jsonschema "⚙️ PGXN Version")
-[![Build Status](https://github.com/tembo-io/pg-jsonschema/actions/workflows/lint-and-test.yml/badge.svg)](https://github.com/tembo-io/pg-jsonschema/actions/workflows/lint-and-test.yml "🧪 Lint and Test")
-[![Code Coverage](https://codecov.io/gh/tembo-io/pg-jsonschema/graph/badge.svg?token=DIFED324ZY)](https://codecov.io/gh/tembo-io/pg-jsonschema "📊 Code Coverage")
+[![Build Status](https://github.com/tembo-io/pg-jsonschema-boon/actions/workflows/lint-and-test.yml/badge.svg)](https://github.com/tembo-io/pg-jsonschema-boon/actions/workflows/lint-and-test.yml "🧪 Lint and Test")
+[![Code Coverage](https://codecov.io/gh/tembo-io/pg-jsonschema-boon/graph/badge.svg?token=DIFED324ZY)](https://codecov.io/gh/tembo-io/pg-jsonschema-boon "📊 Code Coverage")
 
 **[Change Log](CHANGELOG.md)** | **[Documentation](doc/jsonschema.md)**
 
