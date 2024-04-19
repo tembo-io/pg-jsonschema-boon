@@ -13,7 +13,7 @@ include $(PGXS)
 
 all: package
 
-.DEFAULT_GOAL: package # Build jsonschmea for the PostgreSQL cluster identified by pg_config.
+.DEFAULT_GOAL: package # Build jsonschema for the PostgreSQL cluster identified by pg_config.
 package:
 	@cargo pgrx package --pg-config "$(PG_CONFIG)"
 

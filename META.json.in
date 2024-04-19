@@ -11,7 +11,7 @@
    "provides": {
       "jsonschema": {
          "abstract": "JSON Schema validation functions for PostgreSQL",
-         "file": "jsonschema.control",
+         "file": "src/lib.rs",
          "docfile": "doc/jsonschema.md",
          "version": "@CARGO_VERSION@"
       }

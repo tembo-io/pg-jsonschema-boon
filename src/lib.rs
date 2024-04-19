@@ -313,7 +313,7 @@ mod tests {
     use pgrx::pg_sys::panic::CaughtError::PostgresError;
     use pgrx::{spi::SpiError, Json, JsonB};
     use serde_json::json;
-    use std::{env, error::Error, fs::File, path::Path};
+    use std::error::Error;
 
     // Enum used to record handling expected errors.
     #[derive(Debug, Eq, PartialEq)]
@@ -322,11 +322,17 @@ mod tests {
         False,
     }
 
-    // Load the named JSON file into a serde_json::Value.
-    fn load_json(name: &str) -> Value {
-        let root_dir = env::var("CARGO_MANIFEST_DIR").unwrap();
-        let root = Path::new(&root_dir);
-        serde_json::from_reader(File::open(root.join("eg").join(name)).unwrap()).unwrap()
+    // Load the user and address schemas (bytes loaded at compile time).
+    fn user_schema() -> Value {
+        let bytes = include_bytes!("../eg/user-profile.schema.json");
+        assert!(!bytes.is_empty());
+        serde_json::from_slice(bytes).unwrap()
+    }
+
+    fn addr_schema() -> Value {
+        let bytes = include_bytes!("../eg/address.schema.json");
+        assert!(!bytes.is_empty());
+        serde_json::from_slice(bytes).unwrap()
     }
 
     // Make sure our Draft enum converts properly into boon's.
@@ -341,8 +347,8 @@ mod tests {
 
     #[test]
     fn test_compiles() -> Result<(), Box<dyn Error>> {
-        let address = load_json("address.schema.json");
-        let user = load_json("user-profile.schema.json");
+        let address = addr_schema();
+        let user = user_schema();
 
         assert!(compiles(
             "https://example.com/address.schema.json",
@@ -370,8 +376,8 @@ mod tests {
 
     #[test]
     fn test_new_compiler() -> Result<(), Box<dyn Error>> {
-        let address = load_json("address.schema.json");
-        let user = load_json("user-profile.schema.json");
+        let address = addr_schema();
+        let user = user_schema();
         let id = String::from("https://example.com/user-profile.schema.json");
         let c = new_compiler(&id, &[address.clone(), user.clone()]);
         assert!(c.is_ok());
@@ -437,8 +443,8 @@ mod tests {
 
     #[test]
     fn test_validate() -> Result<(), Box<dyn Error>> {
-        let address_schema = load_json("address.schema.json");
-        let user_schema = load_json("user-profile.schema.json");
+        let address_schema = addr_schema();
+        let user_schema = user_schema();
         let address = json!({
           "postOfficeBox": "123",
           "streetAddress": "456 Main St",
@@ -566,8 +572,8 @@ mod tests {
 
     #[pg_test]
     fn test_jsonschema_is_valid_multi() -> spi::Result<()> {
-        let address_schema = load_json("address.schema.json");
-        let user_schema = load_json("user-profile.schema.json");
+        let address_schema = addr_schema();
+        let user_schema = user_schema();
         let address_id = address_schema.get("$id").unwrap().as_str().unwrap();
         let user_id = user_schema.get("$id").unwrap().as_str().unwrap();
 
@@ -759,8 +765,8 @@ mod tests {
 
     #[pg_test]
     fn test_jsonschema_validates_multi() -> spi::Result<()> {
-        let address_schema = load_json("address.schema.json");
-        let user_schema = load_json("user-profile.schema.json");
+        let address_schema = addr_schema();
+        let user_schema = user_schema();
         let address_id = address_schema.get("$id").unwrap().as_str().unwrap();
         let user_id = user_schema.get("$id").unwrap().as_str().unwrap();
         let address = json!({
