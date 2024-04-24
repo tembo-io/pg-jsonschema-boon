@@ -5,20 +5,35 @@ on:
     branches-ignore: [wip/**]
 
 jobs:
-  lint:
-    name: 🔎 Lint and Cover
+  test:
     runs-on: ubuntu-latest
+    container: pgxn/pgxn-tools
+    strategy:
+      matrix:
+        pg: [11, 12, 13, 14, 15, 16]
+    name: 🐘 Postgres ${{ matrix.pg }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Start PostgreSQL ${{ matrix.pg }}
+        run: pg-start ${{ matrix.pg }}
+      - name: Setup Rust Cache
+        uses: Swatinem/rust-cache@v2
+      - name: Test on PostgreSQL ${{ matrix.pg }}
+        run: pgrx-build-test
+
+  lint:
+    name: ✅ Lint and Cover
+    runs-on: ubuntu-latest
+    container: pgxn/pgxn-tools
     env: { PGVERSION: 16 }
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Setup Rust Toolchain
-        uses: dtolnay/rust-toolchain@stable
-        with: { components: "rustfmt, clippy" }
+      - name: Start PostgreSQL ${{ env.PGVERSION }}
+        run: pg-start ${{ env.PGVERSION }} libxml2-utils
       - name: Setup Rust Cache
         uses: Swatinem/rust-cache@v2
-      - name: Install Postgres
-        run: sudo ./.ci/apt-install-postgres ${{ env.PGVERSION }}
       - name: Install pgrx
         run: make install-pgrx
       - name: Initialize pgrx
@@ -26,43 +41,10 @@ jobs:
       - name: Format and Lint
         run: make lint
       - name: Generate Coverage
-        run: make cover RUST_BACKTRACE=1 PGUSER=postgres
+        run: make cover RUST_BACKTRACE=1 PGUSER=postgres PGDATA=/var/lib/postgresql/pgrx
       - name: Publish Coverage
         uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           slug: tembo-io/pg-jsonschema-boon
           files: target/cover/cobertura.xml
-      - name: Remove Data Diretory
-        run: rm -rf target/pgrx-test-data-${{ env.PGVERSION }}
-
-  test:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        pg: [11, 12, 13, 14, 15, 16]
-        os: [[🐧, Ubuntu]] # [🍎, macOS], [🪟, Windows]]
-    name: 🐘 Postgres ${{ matrix.pg }} on ${{ matrix.os[0] }} ${{ matrix.os[1] }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Setup Rust Toolchain
-        uses: dtolnay/rust-toolchain@stable
-      - name: Install Postgres ${{ matrix.pg }}
-        run: sudo ./.ci/apt-install-postgres ${{ matrix.pg }}
-      - name: Setup Rust Cache
-        uses: Swatinem/rust-cache@v2
-      - name: Install pgrx
-        run: make install-pgrx
-      - name: Remove Data Diretory
-        run: rm -rf target/pgrx-test-data-${{ matrix.pg }}
-      - name: Initialize pgrx
-        run: make pgrx-init
-      - name: Run the tests
-        run: make test RUST_BACKTRACE=1 PGUSER=postgres
-      - name: Install
-        run: make install
-      - name: Run Install Check
-        run: make installcheck PGUSER=postgres PGPORT=5433
-      - name: Remove Data Diretory
-        run: rm -rf target/pgrx-test-data-${{ matrix.pg }}

@@ -24,8 +24,16 @@ if [ "$(uname -o)" = "Darwin" ]; then
     export RUSTFLAGS="-Clink-arg=-Wl,-undefined,dynamic_lookup $RUSTFLAGS"
 fi
 
+coverargs=()
+if [ -n "${PGUSER}" ]; then
+    coverargs+=(--runas "$PGUSER")
+fi
+if [ -n "${PGDATA}" ]; then
+    coverargs+=(--pgdata "$PGDATA")
+fi
+
 export LLVM_PROFILE_FILE="${DESTDIR}/default_%m_%p.profraw"
-cargo test --all --no-default-features --features "pg${PGVERSION} pg_test" -- --nocapture
+cargo pgrx test "${coverargs[@]}" "pg${PGVERSION}"
 
 grcov "${DESTDIR}" \
     --ignore '**/clang-sys*/**' \
