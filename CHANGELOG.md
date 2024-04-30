@@ -7,7 +7,7 @@ All notable changes to this project will be documented in this file. It uses the
   [Semantic Versioning]: https://semver.org/spec/v2.0.0.html
     "Semantic Versioning 2.0.0"
 
-## [v0.1.0] --- Unreleased
+## [v0.1.0]
 
 The theme of this release is *learning Rust and pgrx.*
 
@@ -16,13 +16,15 @@ The theme of this release is *learning Rust and pgrx.*
 *   First release, everything is new!
 *   JSON Schema validation using [boon]
 *   Fully supports draft 2020-12, draft 2019-09, draft-7, draft-6, and draft-4
-*   Multi-object schema compsition
+*   Multi-object schema composition
+*   Remote fetching of resources disabled
 
 ### 🏗️ Build Setup
 
 *   Built with Rust
 *   Use `make` for most actions
 *   Download from [PGXN] or [GitHub]
+*   [CI testing] on PostgreSQL 11--16
 
 ### 📚 Documentation
 
@@ -39,3 +41,4 @@ The theme of this release is *learning Rust and pgrx.*
   [reference documentation]: https://github.com/tembo-io/pg-jsonschema-boon/blob/v0.1.0/doc/jsonschema.md
   [benchmark script]: https://github.com/tembo-io/pg-jsonschema-boon/blob/v0.1.0/eg/bench.sql
   [composition example]: https://github.com/tembo-io/pg-jsonschema-boon/blob/v0.1.0/eg/user.sql
+  [CI testing]: https://github.com/tembo-io/pg-jsonschema-boon/actions/workflows/lint-and-test.yml
