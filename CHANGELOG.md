@@ -7,6 +7,10 @@ All notable changes to this project will be documented in this file. It uses the
   [Semantic Versioning]: https://semver.org/spec/v2.0.0.html
     "Semantic Versioning 2.0.0"
 
+## [v0.1.1] --- Unreleased
+
+The them of this release is *fast follows.*
+
 ## [v0.1.0] --- 2024-04-30
 
 The theme of this release is *learning Rust and pgrx.*
