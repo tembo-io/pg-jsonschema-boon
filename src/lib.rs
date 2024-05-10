@@ -313,7 +313,6 @@ mod tests {
     use pgrx::pg_sys::panic::CaughtError::PostgresError;
     use pgrx::{spi::SpiError, Json, JsonB};
     use serde_json::json;
-    use std::error::Error;
 
     // Enum used to record handling expected errors.
     #[derive(Debug, Eq, PartialEq)]
