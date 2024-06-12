@@ -37,7 +37,7 @@ make install-pgrx
 ```
 
 Now build and jsonschema against a working PostgreSQL server, including
-development libraries and the [pg_config], which must be in the path:
+development libraries and [pg_config], which must be in the path:
 
 ``` sh
 make
