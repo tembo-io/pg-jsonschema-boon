@@ -31,12 +31,12 @@ INFO:  jsonschema validation failed with file:///schema.json#
 
 -- Invalid schema
 SELECT json_matches_schema('{"type": "nonesuch"}', '{"x": "y"}');
-ERROR:  file:///schema.json is not valid against metaschema: jsonschema validation failed with https://json-schema.org/draft/2020-12/schema#
+ERROR:  file:///schema.json# is not valid against metaschema: jsonschema validation failed with https://json-schema.org/draft/2020-12/schema#
 - at '/type': anyOf failed
   - at '/type': value must be one of 'array', 'boolean', 'integer', 'null', 'number', 'object', 'string'
   - at '/type': want array, but got string
 SELECT jsonb_matches_schema('{"type": "nonesuch"}', '{"x": "y"}');
-ERROR:  file:///schema.json is not valid against metaschema: jsonschema validation failed with https://json-schema.org/draft/2020-12/schema#
+ERROR:  file:///schema.json# is not valid against metaschema: jsonschema validation failed with https://json-schema.org/draft/2020-12/schema#
 - at '/type': anyOf failed
   - at '/type': value must be one of 'array', 'boolean', 'integer', 'null', 'number', 'object', 'string'
   - at '/type': want array, but got string

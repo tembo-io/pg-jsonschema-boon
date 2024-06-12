@@ -9,7 +9,16 @@ All notable changes to this project will be documented in this file. It uses the
 
 ## [v0.1.1] --- Unreleased
 
-The them of this release is *fast follows.*
+The theme of this release is *fast follows.*
+
+### ⬆️ Dependency Updates
+
+*   Updated boon to v0.6.
+
+### ⚡ Improvements
+
+*   Removed custom schema loader, taking advantage of the feature of boon v0.6
+    to remove all loaders (santhosh-tekuri/boon#12).
 
 ## [v0.1.0] --- 2024-04-30
 

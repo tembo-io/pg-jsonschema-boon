@@ -73,7 +73,7 @@ SELECT jsonschema_validates(:'invalid_user'::jsonb, :'user_schema_id', :'addr_sc
 SELECT jsonschema_validates(:'invalid_user'::jsonb, :'user_schema_id', :'addr_schema'::json, :'user_schema'::json );
 
 -- Invalid schema
-\set invalid_schema '{"type": "nonesuch", "$id": "file:///lol.json"}'
+\set invalid_schema '{"type": "nonesuch"}'
 SELECT jsonschema_validates(:'user'::json, :'user_schema_id', :'invalid_schema'::json, :'user_schema'::json );
 SELECT jsonschema_validates(:'user'::json, :'user_schema_id', :'invalid_schema'::jsonb, :'user_schema'::jsonb );
 SELECT jsonschema_validates(:'user'::jsonb, :'user_schema_id', :'invalid_schema'::jsonb, :'user_schema'::jsonb );

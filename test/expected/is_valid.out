@@ -13,7 +13,7 @@ SELECT jsonschema_is_valid('{"type": "object"}'::jsonb);
 
 -- Invalid schema
 SELECT jsonschema_is_valid('["not a schema"]'::json);
-INFO:  file:///schema.json is not valid against metaschema: jsonschema validation failed with https://json-schema.org/draft/2020-12/schema#
+INFO:  file:///schema.json# is not valid against metaschema: jsonschema validation failed with https://json-schema.org/draft/2020-12/schema#
 - at '': want boolean or object, but got array
  jsonschema_is_valid 
 ---------------------
@@ -21,7 +21,7 @@ INFO:  file:///schema.json is not valid against metaschema: jsonschema validatio
 (1 row)
 
 SELECT jsonschema_is_valid('["not a schema"]'::jsonb);
-INFO:  file:///schema.json is not valid against metaschema: jsonschema validation failed with https://json-schema.org/draft/2020-12/schema#
+INFO:  file:///schema.json# is not valid against metaschema: jsonschema validation failed with https://json-schema.org/draft/2020-12/schema#
 - at '': want boolean or object, but got array
  jsonschema_is_valid 
 ---------------------

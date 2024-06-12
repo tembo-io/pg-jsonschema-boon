@@ -52,6 +52,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f538837af36e6f6a9be0faa67f9a314f8119e4e4b5867c6ab40ed60360142519"
 
 [[package]]
+name = "appendlist"
+version = "1.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e149dc73cd30538307e7ffa2acd3d2221148eaeed4871f246657b1c3eaa1cbd2"
+
+[[package]]
 name = "async-trait"
 version = "0.1.80"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -189,11 +195,12 @@ dependencies = [
 
 [[package]]
 name = "boon"
-version = "0.5.3"
+version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "35b8a1c0fea99bf5301d3851e261168de966419c1d02a705a7ca11da64e54827"
+checksum = "9672cb0edeadf721484e298c0ed4dd70b0eaa3acaed5b4fd0bd73ca32e51d814"
 dependencies = [
  "ahash",
+ "appendlist",
  "base64",
  "fluent-uri",
  "idna",
