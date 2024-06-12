@@ -5,5 +5,5 @@
 **/*.rs.bk
 .vscode/
 META.json
-jsonschema-*
+/jsonschema-*
 vendor/
