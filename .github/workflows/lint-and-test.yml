@@ -10,13 +10,13 @@ jobs:
     container: pgxn/pgxn-tools
     strategy:
       matrix:
-        pg: [11, 12, 13, 14, 15, 16]
+        pg: [12, 13, 14, 15, 16]
     name: 🐘 Postgres ${{ matrix.pg }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Start PostgreSQL ${{ matrix.pg }}
-        run: pg-start ${{ matrix.pg }}
+        run: pg-start ${{ matrix.pg }} pkg-config
       - name: Setup Rust Cache
         uses: Swatinem/rust-cache@v2
       - name: Test on PostgreSQL ${{ matrix.pg }}
