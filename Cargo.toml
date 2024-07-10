@@ -1,7 +1,7 @@
 [package]
 name = "jsonschema"
 version = "0.1.1"
-description = "JSONSchema validation in Postgres"
+description = "JSON Schema validation in Postgres"
 readme = "README.md"
 repository = "https://github.com/tembo-io/pg-jsonschema-boon"
 authors = ["David E. Wheeler <david@justatheory.com>"]
@@ -12,7 +12,7 @@ edition = "2021"
 exclude = [ ".github", ".gitattributes", "target", ".ci", ".vscode", ".gitignore", "META.json.in" ]
 
 [lib]
-crate-type = ["cdylib"]
+crate-type = ["cdylib", "lib"]
 
 [features]
 default = ["pg16"]
