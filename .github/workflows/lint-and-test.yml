@@ -16,7 +16,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Start PostgreSQL ${{ matrix.pg }}
-        run: pg-start ${{ matrix.pg }} pkgconf
+        run: pg-start ${{ matrix.pg }}
       - name: Setup Rust Cache
         uses: Swatinem/rust-cache@v2
       - name: Test on PostgreSQL ${{ matrix.pg }}
@@ -31,7 +31,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Start PostgreSQL ${{ env.PGVERSION }}
-        run: pg-start ${{ env.PGVERSION }} libxml2-utils pkgconf
+        run: pg-start ${{ env.PGVERSION }} libxml2-utils
       - name: Setup Rust Cache
         uses: Swatinem/rust-cache@v2
       - name: Install pgrx
