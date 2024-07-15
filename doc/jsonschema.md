@@ -170,7 +170,7 @@ SELECT jsonschema_is_valid(
 Any number of schemas can be passed, allowing for arbitrarily complex schemas.
 The same is true for validating JSON values against a composed schema:
 
-```
+```psql
 SELECT jsonschema_validates(
     json_build_object(
       'first_name', 'Naomi',
