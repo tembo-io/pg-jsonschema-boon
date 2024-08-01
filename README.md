@@ -5,6 +5,7 @@ JSON Schema Postgres Extension
 [![PGXN Version](https://badge.fury.io/pg/jsonschema.svg)](https://badge.fury.io/pg/jsonschema "⚙️ PGXN Version")
 [![Build Status](https://github.com/tembo-io/pg-jsonschema-boon/actions/workflows/lint-and-test.yml/badge.svg)](https://github.com/tembo-io/pg-jsonschema-boon/actions/workflows/lint-and-test.yml "🧪 Lint and Test")
 [![Code Coverage](https://codecov.io/gh/tembo-io/pg-jsonschema-boon/graph/badge.svg?token=DIFED324ZY)](https://codecov.io/gh/tembo-io/pg-jsonschema-boon "📊 Code Coverage")
+[![Dependency Status](https://deps.rs/repo/github/tembo-io/pg-jsonschema-boon/status.svg)](https://deps.rs/repo/github/tembo-io/pg-jsonschema-boon "📦 Dependency Status")
 
 **[Change Log](CHANGELOG.md)** | **[Documentation](doc/jsonschema.md)**
 
