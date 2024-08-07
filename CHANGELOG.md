@@ -46,7 +46,7 @@ The theme of this release is *learning Rust and pgrx.*
 *   Performance [benchmark script]
 *   Multi-schema [composition example]
 
-  [v0.1.0]: https://github.com/tembo-io/pg-jsonschema-boon/compare/34d5d49...HEAD
+  [v0.1.0]: https://github.com/tembo-io/pg-jsonschema-boon/compare/34d5d49...v0.1.0
   [boon]: https://github.com/santhosh-tekuri/boon
   [README]: https://github.com/tembo-io/pg-jsonschema-boon/blob/v0.1.0/README.md
   [PGXN]: https://pgxn.org/dist/jsonschema/

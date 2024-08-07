@@ -75,11 +75,21 @@ sub run {
                 $in_item = $self->print_line($out, $line, $in_item)
                     unless $line =~ $link_regex;
 			}
+            # Reach the end of the file; must be the first release. Diff the
+            # initial commit.
+            return $self->finish_list($out, $self->initial_commit);
         }
     }
 
     # All done!
     die "Version $self->{version} not found in $self->{file}\n" unless $found;
+}
+
+# Called when no previous releases found. Return the initial commit in
+# brackets to be parsed by finish_list().
+sub initial_commit {
+    my $sha = qx(git rev-list --max-parents=0 HEAD);
+    return "["  . substr($sha, 0, 7) . "]";
 }
 
 # Called when the next version header is found in line.
@@ -92,7 +102,7 @@ sub finish_list {
 
 	# Emit a footer line with a link to the diff for this version.
     print {$out} sprintf(
-		"---\n\n🆚 For more detail compare [changes since %s](%s/compare/%s...%s).\n",
+		"---\n\n🆚 For more detail compare [changes since %s](%s/compare/%s...v%s).\n",
 		$prev, $self->{repo}, $prev, $self->{version},
 	);
 
