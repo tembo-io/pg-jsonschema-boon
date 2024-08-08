@@ -77,6 +77,7 @@ sub run {
 			}
             # Reach the end of the file; must be the first release. Diff the
             # initial commit.
+            print {$out} "\n\n";
             return $self->finish_list($out, $self->initial_commit);
         }
     }
