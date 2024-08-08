@@ -10,7 +10,7 @@ jobs:
     container: pgxn/pgxn-tools
     strategy:
       matrix:
-        pg: [11, 12, 13, 14, 15, 16]
+        pg: [12, 13, 14, 15, 16]
     name: 🐘 Postgres ${{ matrix.pg }}
     steps:
       - name: Checkout

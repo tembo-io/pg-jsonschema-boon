@@ -170,7 +170,7 @@ SELECT jsonschema_is_valid(
 Any number of schemas can be passed, allowing for arbitrarily complex schemas.
 The same is true for validating JSON values against a composed schema:
 
-```
+```psql
 SELECT jsonschema_validates(
     json_build_object(
       'first_name', 'Naomi',
@@ -468,7 +468,7 @@ SOFTWARE.
   [draft 2019-09 report]: https://bowtie.report/#/dialects/draft2019-09 "boon draft 2019-09 report"
   [draft 2020-12 badge]: https://img.shields.io/endpoint?url=https://bowtie.report/badges/rust-boon/compliance/draft2020-12.json
   [draft 2020-12 report]: https://bowtie.report/#/dialects/draft2020-12 "boon draft 2020-12 report"
-  [boon crate]: https://github.com/santhosh-tekuri/boon/ "boon: JSONSchema (draft 2020-12, draft 2019-09, draft-7, draft-6, draft-4) Validation in Rust"
+  [boon crate]: https://github.com/santhosh-tekuri/boon/ "boon: JSON Schema (draft 2020-12, draft 2019-09, draft-7, draft-6, draft-4) Validation in Rust"
   [2020-12 draft]: https://json-schema.org/draft/2020-12/release-notes "JSON Schema: 2020-12 Release Notes"
   [composition]: https://json-schema.org/understanding-json-schema/structuring
     "JSON Schema: Structuring a complex schema"
