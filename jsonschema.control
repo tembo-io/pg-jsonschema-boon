@@ -2,5 +2,5 @@ comment = 'JSON Schema (draft 2020-12, draft 2019-09, draft-7, draft-6, draft-4)
 default_version = '@CARGO_VERSION@'
 # directory = 'jsonschema'
 module_pathname = '$libdir/jsonschema'
-relocatable = false
+relocatable = true
 superuser = true
