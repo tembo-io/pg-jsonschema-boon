@@ -293,34 +293,31 @@ fn validate(id: &str, schemas: &[Value], instance: Value) -> Result<bool, Compil
     }
 }
 
+// Utility functions for the tests and pg_tests modules to use.
 #[cfg(any(test, feature = "pg_test"))]
-#[pg_schema]
-mod tests {
-    use super::*;
-    use pgrx::pg_sys::panic::CaughtError::PostgresError;
-    use pgrx::{spi::SpiError, Json, JsonB};
-    use serde_json::json;
-    use std::error::Error;
-
-    // Enum used to record handling expected errors.
-    #[derive(Debug, Eq, PartialEq)]
-    enum ErrorCaught {
-        True,
-        False,
-    }
-
+pub mod test_util {
+    use serde_json::Value;
     // Load the user and address schemas (bytes loaded at compile time).
-    fn user_schema() -> Value {
+    pub fn user_schema() -> Value {
         let bytes = include_bytes!("../eg/user-profile.schema.json");
         assert!(!bytes.is_empty());
         serde_json::from_slice(bytes).unwrap()
     }
 
-    fn addr_schema() -> Value {
+    pub fn addr_schema() -> Value {
         let bytes = include_bytes!("../eg/address.schema.json");
         assert!(!bytes.is_empty());
         serde_json::from_slice(bytes).unwrap()
     }
+}
+
+// Rust-only tests.
+#[cfg(test)]
+mod test {
+    use super::*;
+    use crate::test_util::*;
+    use serde_json::json;
+    use std::error::Error;
 
     // Make sure our Draft enum converts properly into boon's.
     #[test]
@@ -508,6 +505,24 @@ mod tests {
         .unwrap());
 
         Ok(())
+    }
+}
+
+// pgrx tests.
+#[cfg(any(test, feature = "pg_test"))]
+#[pg_schema]
+mod tests {
+    use super::*;
+    use crate::test_util::*;
+    use pgrx::pg_sys::panic::CaughtError::PostgresError;
+    use pgrx::{spi::SpiError, Json, JsonB};
+    use serde_json::json;
+
+    // Enum used to record handling expected errors.
+    #[derive(Debug, Eq, PartialEq)]
+    enum ErrorCaught {
+        True,
+        False,
     }
 
     #[pg_test]
