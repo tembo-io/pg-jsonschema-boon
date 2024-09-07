@@ -35,6 +35,8 @@ The theme of this release is *fast follows.*
 *   Removed custom schema loader, taking advantage of the feature of boon v0.6
     to remove all loaders (santhosh-tekuri/boon#12).
 
+  [v0.1.1]: https://github.com/tembo-io/pg-jsonschema-boon/compare/v0.1.0...v0.1.1
+
 ## [v0.1.0] --- 2024-04-30
 
 The theme of this release is *learning Rust and pgrx.*
