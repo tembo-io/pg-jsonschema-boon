@@ -7,7 +7,19 @@ All notable changes to this project will be documented in this file. It uses the
   [Semantic Versioning]: https://semver.org/spec/v2.0.0.html
     "Semantic Versioning 2.0.0"
 
-## [v0.1.2] --- 2024-08-26
+## [v0.1.3] — 2024-10-03
+
+### ⬆️ Dependency Updates
+
+*   Upgraded pgrx to v0.12.5 with support for the Postgres 17.0 release
+*   Upgraded all other dependencies
+
+### ⬆️ Dependency Updates
+
+*   Upgraded pgrx to v0.12.5 with support for the Postgres 17.0 release
+*   Upgraded all other dependencies
+
+## [v0.1.2] — 2024-08-26
 
 ### ⬆️ Dependency Updates
 
@@ -22,7 +34,7 @@ All notable changes to this project will be documented in this file. It uses the
 *   Dropped support for Postgres 11 (no longer supported by pgrx).
 *   Added support for Postgres 17.
 
-## [v0.1.1] --- 2024-06-12
+## [v0.1.1] — 2024-06-12
 
 The theme of this release is *fast follows.*
 
@@ -37,7 +49,7 @@ The theme of this release is *fast follows.*
 
   [v0.1.1]: https://github.com/tembo-io/pg-jsonschema-boon/compare/v0.1.0...v0.1.1
 
-## [v0.1.0] --- 2024-04-30
+## [v0.1.0] — 2024-04-30
 
 The theme of this release is *learning Rust and pgrx.*
 

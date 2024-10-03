@@ -1,11 +1,7 @@
 JSON Schema Postgres Extension
 ==============================
 
-[![MIT License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT "⚖️ MIT License")
-[![PGXN Version](https://badge.fury.io/pg/jsonschema.svg)](https://badge.fury.io/pg/jsonschema "⚙️ PGXN Version")
-[![Build Status](https://github.com/tembo-io/pg-jsonschema-boon/actions/workflows/lint-and-test.yml/badge.svg)](https://github.com/tembo-io/pg-jsonschema-boon/actions/workflows/lint-and-test.yml "🧪 Lint and Test")
-[![Code Coverage](https://codecov.io/gh/tembo-io/pg-jsonschema-boon/graph/badge.svg?token=DIFED324ZY)](https://codecov.io/gh/tembo-io/pg-jsonschema-boon "📊 Code Coverage")
-[![Dependency Status](https://deps.rs/repo/github/tembo-io/pg-jsonschema-boon/status.svg)](https://deps.rs/repo/github/tembo-io/pg-jsonschema-boon "📦 Dependency Status")
+[![license-badge]][license] [![pgxn-badge]][pgxn] [![ci-badge]][ci] [![cov-badge]][cov] [![deps-badge]][deps]
 
 **[Change Log](CHANGELOG.md)** | **[Documentation](doc/jsonschema.md)**
 
@@ -70,7 +66,7 @@ See [the documentation](./doc/jsonschema.md) for usage details and features.
 Dependencies
 ------------
 
-The `jsonschema` data type has no run-time dependencies other than PostgreSQL.
+The `jsonschema` data type has no runtime dependencies other than PostgreSQL.
 At build time it requires [Rust] and [pgrx].
 
 Prior Art
@@ -160,6 +156,16 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
+  [license-badge]: https://img.shields.io/badge/License-MIT-blue.svg "⚖️ MIT License"
+  [license]: https://opensource.org/licenses/MIT "⚖️ MIT License"
+  [pgxn-badge]: https://badge.fury.io/pg/jsonschema.svg "⚙️ PGXN Version"
+  [pgxn]: https://pgxn.org/dist/jsonschema "⚙️ PGXN Version"
+  [ci-badge]: https://github.com/tembo-io/pg-jsonschema-boon/actions/workflows/lint-and-test.yml/badge.svg "🧪 Lint and Test"
+  [ci]: https://github.com/tembo-io/pg-jsonschema-boon/actions/workflows/lint-and-test.yml "🧪 Lint and Test"
+  [cov-badge]: https://codecov.io/gh/tembo-io/pg-jsonschema-boon/graph/badge.svg?token=DIFED324ZY "📊 Code Coverage"
+  [cov]: https://codecov.io/gh/tembo-io/pg-jsonschema-boon "📊 Code Coverage"
+  [deps-badge]: https://deps.rs/repo/github/tembo-io/pg-jsonschema-boon/status.svg "📦 Dependency Status"
+  [deps]: https://deps.rs/repo/github/tembo-io/pg-jsonschema-boon "📦 Dependency Status"
   [JSON Schema]: https://json-schema.org
   [specification drafts]: https://json-schema.org/specification
   [JSON-Schema-Test-Suite]: https://github.com/json-schema-org/JSON-Schema-Test-Suite
