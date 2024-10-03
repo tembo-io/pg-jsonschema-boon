@@ -14,11 +14,6 @@ All notable changes to this project will be documented in this file. It uses the
 *   Upgraded pgrx to v0.12.5 with support for the Postgres 17.0 release
 *   Upgraded all other dependencies
 
-### ⬆️ Dependency Updates
-
-*   Upgraded pgrx to v0.12.5 with support for the Postgres 17.0 release
-*   Upgraded all other dependencies
-
 ## [v0.1.2] — 2024-08-26
 
 ### ⬆️ Dependency Updates
