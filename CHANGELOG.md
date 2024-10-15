@@ -7,6 +7,12 @@ All notable changes to this project will be documented in this file. It uses the
   [Semantic Versioning]: https://semver.org/spec/v2.0.0.html
     "Semantic Versioning 2.0.0"
 
+## [v0.1.4] — Unreleased
+
+### ⬆️ Dependency Updates
+
+*   Upgraded pgrx to v0.12.6
+
 ## [v0.1.3] — 2024-10-03
 
 ### ⬆️ Dependency Updates
