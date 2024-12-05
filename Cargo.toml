@@ -1,6 +1,6 @@
 [package]
 name = "jsonschema"
-version = "0.1.3"
+version = "0.1.4"
 description = "JSON Schema validation in Postgres"
 readme = "README.md"
 repository = "https://github.com/tembo-io/pg-jsonschema-boon"
