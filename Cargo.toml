@@ -25,12 +25,12 @@ pg17 = ["pgrx/pg17", "pgrx-tests/pg17" ]
 pg_test = []
 
 [dependencies]
-pgrx = "0.12.6"
-boon = "0.6"
-serde_json = "1.0"
+pgrx = "0.12.9"
+boon = "0.6.0"
+serde_json = "1.0.133"
 
 [dev-dependencies]
-pgrx-tests = "0.12.6"
+pgrx-tests = "0.12.9"
 
 [profile.dev]
 panic = "unwind"
