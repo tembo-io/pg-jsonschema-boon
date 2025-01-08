@@ -7,6 +7,15 @@ All notable changes to this project will be documented in this file. It uses the
   [Semantic Versioning]: https://semver.org/spec/v2.0.0.html
     "Semantic Versioning 2.0.0"
 
+## [v0.1.5] — 2025-01-08
+
+### ⬆️ Dependency Updates
+
+*   Upgraded boon to v0.6.1 to mitigate vulnerabilities in its dependencies.
+*   Upgraded all other dependencies
+
+  [v0.1.5]: https://github.com/tembo-io/pg-jsonschema-boon/compare/v0.1.4...v0.1.4
+
 ## [v0.1.4] — 2024-12-04
 
 ### ⬆️ Dependency Updates
@@ -14,12 +23,16 @@ All notable changes to this project will be documented in this file. It uses the
 *   Upgraded pgrx to v0.12.9
 *   Upgraded all other dependencies
 
+  [v0.1.4]: https://github.com/tembo-io/pg-jsonschema-boon/compare/v0.1.4...v0.1.4
+
 ## [v0.1.3] — 2024-10-03
 
 ### ⬆️ Dependency Updates
 
 *   Upgraded pgrx to v0.12.5 with support for the Postgres 17.0 release
 *   Upgraded all other dependencies
+
+  [v0.1.3]: https://github.com/tembo-io/pg-jsonschema-boon/compare/v0.1.2...v0.1.3
 
 ## [v0.1.2] — 2024-08-26
 
@@ -35,6 +48,8 @@ All notable changes to this project will be documented in this file. It uses the
 
 *   Dropped support for Postgres 11 (no longer supported by pgrx).
 *   Added support for Postgres 17.
+
+  [v0.1.2]: https://github.com/tembo-io/pg-jsonschema-boon/compare/v0.1.1...v0.1.2
 
 ## [v0.1.1] — 2024-06-12
 
