@@ -12,6 +12,7 @@ All notable changes to this project will be documented in this file. It uses the
 ### ⬆️ Dependency Updates
 
 *   Upgraded pgrx to v0.13.0
+*   Upgraded all other dependencies
 
 ## [v0.1.5] — 2025-01-08
 

@@ -73,3 +73,8 @@ release-notes: CHANGELOG.md
 ## vendor: Vendor all crates.io and git dependencies.
 vendor:
 	@cargo vendor
+
+.PHONY: update-dependencies # Update all dependencies.
+update-dependencies:
+	@cargo install cargo-edit
+	@cargo upgrade -i allow && cargo update
