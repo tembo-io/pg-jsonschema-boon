@@ -1,6 +1,6 @@
 [package]
 name = "jsonschema"
-version = "0.1.5"
+version = "0.1.6"
 description = "JSON Schema validation in Postgres"
 readme = "README.md"
 repository = "https://github.com/tembo-io/pg-jsonschema-boon"
@@ -25,12 +25,12 @@ pg17 = ["pgrx/pg17", "pgrx-tests/pg17" ]
 pg_test = []
 
 [dependencies]
-pgrx = "0.12.9"
+pgrx = "0.13.0"
 boon = "0.6.1"
 serde_json = "1.0.135"
 
 [dev-dependencies]
-pgrx-tests = "0.12.9"
+pgrx-tests = "0.13.0"
 
 [profile.dev]
 panic = "unwind"
