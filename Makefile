@@ -78,5 +78,4 @@ vendor:
 update-dependencies:
 	@cargo install cargo-edit
 	@cargo upgrade -i allow --recursive true
-	@cargo update
-	@cargo update
+	@cargo update --recursive
