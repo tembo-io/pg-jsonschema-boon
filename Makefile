@@ -77,4 +77,6 @@ vendor:
 .PHONY: update-dependencies # Update all dependencies.
 update-dependencies:
 	@cargo install cargo-edit
-	@cargo upgrade -i allow && cargo update
+	@cargo upgrade -i allow --recursive true
+	@cargo update
+	@cargo update
