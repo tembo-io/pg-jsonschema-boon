@@ -225,7 +225,7 @@ fn init_guc() {
 /// which it does the first time it's used, either by `CREATE EXTENSION` and
 /// `UPDATE EXTENSION` or when one of its functions is called.
 #[pg_guard]
-extern "C" fn _PG_init() {
+extern "C-unwind" fn _PG_init() {
     init_guc();
 }
 
