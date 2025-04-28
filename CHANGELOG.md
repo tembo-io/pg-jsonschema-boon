@@ -17,6 +17,9 @@ All notable changes to this project will be documented in this file. It uses the
 ### 📔 Notes
 
 *   Dropped support for Postgres 12 (no longer supported by pgrx).
+*   Removed the `$libdir/` prefix from `module_pathname`, so if the module is
+    installed elsewhere in `dynamic_library_path` Postgres will be able to
+    find it.
 
   [v0.1.7]: https://github.com/tembo-io/pg-jsonschema-boon/compare/v0.1.6...v0.1.7
 
