@@ -136,7 +136,7 @@ Time: 741.202 ms
 Copyright and License
 ---------------------
 
-Copyright (c) 2024 Tembo
+Copyright (c) 2025 David E. Wheeler, 2024-2025 Tembo
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -160,12 +160,12 @@ SOFTWARE.
   [license]: https://opensource.org/licenses/MIT "⚖️ MIT License"
   [pgxn-badge]: https://badge.fury.io/pg/jsonschema.svg "⚙️ PGXN Version"
   [pgxn]: https://pgxn.org/dist/jsonschema "⚙️ PGXN Version"
-  [ci-badge]: https://github.com/tembo-io/pg-jsonschema-boon/actions/workflows/lint-and-test.yml/badge.svg "🧪 Lint and Test"
-  [ci]: https://github.com/tembo-io/pg-jsonschema-boon/actions/workflows/lint-and-test.yml "🧪 Lint and Test"
-  [cov-badge]: https://codecov.io/gh/tembo-io/pg-jsonschema-boon/graph/badge.svg?token=DIFED324ZY "📊 Code Coverage"
-  [cov]: https://codecov.io/gh/tembo-io/pg-jsonschema-boon "📊 Code Coverage"
-  [deps-badge]: https://deps.rs/repo/github/tembo-io/pg-jsonschema-boon/status.svg "📦 Dependency Status"
-  [deps]: https://deps.rs/repo/github/tembo-io/pg-jsonschema-boon "📦 Dependency Status"
+  [ci-badge]: https://github.com/theory/pg-jsonschema-boon/actions/workflows/lint-and-test.yml/badge.svg "🧪 Lint and Test"
+  [ci]: https://github.com/theory/pg-jsonschema-boon/actions/workflows/lint-and-test.yml "🧪 Lint and Test"
+  [cov-badge]: https://codecov.io/gh/theory/pg-jsonschema-boon/graph/badge.svg?token=DIFED324ZY "📊 Code Coverage"
+  [cov]: https://codecov.io/gh/theory/pg-jsonschema-boon "📊 Code Coverage"
+  [deps-badge]: https://deps.rs/repo/github/theory/pg-jsonschema-boon/status.svg "📦 Dependency Status"
+  [deps]: https://deps.rs/repo/github/theory/pg-jsonschema-boon "📦 Dependency Status"
   [JSON Schema]: https://json-schema.org
   [specification drafts]: https://json-schema.org/specification
   [JSON-Schema-Test-Suite]: https://github.com/json-schema-org/JSON-Schema-Test-Suite

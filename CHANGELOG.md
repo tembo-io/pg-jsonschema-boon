@@ -21,7 +21,7 @@ All notable changes to this project will be documented in this file. It uses the
     installed elsewhere in `dynamic_library_path` Postgres will be able to
     find it.
 
-  [v0.1.7]: https://github.com/tembo-io/pg-jsonschema-boon/compare/v0.1.6...v0.1.7
+  [v0.1.7]: https://github.com/theory/pg-jsonschema-boon/compare/v0.1.6...v0.1.7
 
 ## [v0.1.6] — 2025-02-25
 
@@ -31,7 +31,7 @@ All notable changes to this project will be documented in this file. It uses the
 *   Upgraded all other dependencies
 *   Added missing v0.1.5 upgrade file
 
-  [v0.1.6]: https://github.com/tembo-io/pg-jsonschema-boon/compare/v0.1.5...v0.1.6
+  [v0.1.6]: https://github.com/theory/pg-jsonschema-boon/compare/v0.1.5...v0.1.6
 
 ## [v0.1.5] — 2025-01-08
 
@@ -40,7 +40,7 @@ All notable changes to this project will be documented in this file. It uses the
 *   Upgraded boon to v0.6.1 to mitigate vulnerabilities in its dependencies.
 *   Upgraded all other dependencies
 
-  [v0.1.5]: https://github.com/tembo-io/pg-jsonschema-boon/compare/v0.1.4...v0.1.5
+  [v0.1.5]: https://github.com/theory/pg-jsonschema-boon/compare/v0.1.4...v0.1.5
 
 ## [v0.1.4] — 2024-12-04
 
@@ -49,7 +49,7 @@ All notable changes to this project will be documented in this file. It uses the
 *   Upgraded pgrx to v0.12.9
 *   Upgraded all other dependencies
 
-  [v0.1.4]: https://github.com/tembo-io/pg-jsonschema-boon/compare/v0.1.3...v0.1.4
+  [v0.1.4]: https://github.com/theory/pg-jsonschema-boon/compare/v0.1.3...v0.1.4
 
 ## [v0.1.3] — 2024-10-03
 
@@ -58,7 +58,7 @@ All notable changes to this project will be documented in this file. It uses the
 *   Upgraded pgrx to v0.12.5 with support for the Postgres 17.0 release
 *   Upgraded all other dependencies
 
-  [v0.1.3]: https://github.com/tembo-io/pg-jsonschema-boon/compare/v0.1.2...v0.1.3
+  [v0.1.3]: https://github.com/theory/pg-jsonschema-boon/compare/v0.1.2...v0.1.3
 
 ## [v0.1.2] — 2024-08-26
 
@@ -75,7 +75,7 @@ All notable changes to this project will be documented in this file. It uses the
 *   Dropped support for Postgres 11 (no longer supported by pgrx).
 *   Added support for Postgres 17.
 
-  [v0.1.2]: https://github.com/tembo-io/pg-jsonschema-boon/compare/v0.1.1...v0.1.2
+  [v0.1.2]: https://github.com/theory/pg-jsonschema-boon/compare/v0.1.1...v0.1.2
 
 ## [v0.1.1] — 2024-06-12
 
@@ -90,7 +90,7 @@ The theme of this release is *fast follows.*
 *   Removed custom schema loader, taking advantage of the feature of boon v0.6
     to remove all loaders (santhosh-tekuri/boon#12).
 
-  [v0.1.1]: https://github.com/tembo-io/pg-jsonschema-boon/compare/v0.1.0...v0.1.1
+  [v0.1.1]: https://github.com/theory/pg-jsonschema-boon/compare/v0.1.0...v0.1.1
 
 ## [v0.1.0] — 2024-04-30
 
@@ -118,12 +118,12 @@ The theme of this release is *learning Rust and pgrx.*
 *   Performance [benchmark script]
 *   Multi-schema [composition example]
 
-  [v0.1.0]: https://github.com/tembo-io/pg-jsonschema-boon/compare/34d5d49...v0.1.0
+  [v0.1.0]: https://github.com/theory/pg-jsonschema-boon/compare/34d5d49...v0.1.0
   [boon]: https://github.com/santhosh-tekuri/boon
-  [README]: https://github.com/tembo-io/pg-jsonschema-boon/blob/v0.1.0/README.md
+  [README]: https://github.com/theory/pg-jsonschema-boon/blob/v0.1.0/README.md
   [PGXN]: https://pgxn.org/dist/jsonschema/
-  [GitHub]: https://github.com/tembo-io/pg-jsonschema-boon/releases
-  [reference documentation]: https://github.com/tembo-io/pg-jsonschema-boon/blob/v0.1.0/doc/jsonschema.md
-  [benchmark script]: https://github.com/tembo-io/pg-jsonschema-boon/blob/v0.1.0/eg/bench.sql
-  [composition example]: https://github.com/tembo-io/pg-jsonschema-boon/blob/v0.1.0/eg/user.sql
-  [CI testing]: https://github.com/tembo-io/pg-jsonschema-boon/actions/workflows/lint-and-test.yml
+  [GitHub]: https://github.com/theory/pg-jsonschema-boon/releases
+  [reference documentation]: https://github.com/theory/pg-jsonschema-boon/blob/v0.1.0/doc/jsonschema.md
+  [benchmark script]: https://github.com/theory/pg-jsonschema-boon/blob/v0.1.0/eg/bench.sql
+  [composition example]: https://github.com/theory/pg-jsonschema-boon/blob/v0.1.0/eg/user.sql
+  [CI testing]: https://github.com/theory/pg-jsonschema-boon/actions/workflows/lint-and-test.yml

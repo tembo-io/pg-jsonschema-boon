@@ -4,8 +4,7 @@
    "description": "The jsonschema extension provides JSON Schema validation functions supporting drafts 2020-12, 2019-09, 7, 6, and 4",
    "version": "@CARGO_VERSION@",
    "maintainer": [
-      "David E. Wheeler <david@justatheory.com>",
-      "Tembo <admin+pgxn@tembo.io>"
+      "David E. Wheeler <david@justatheory.com>"
    ],
    "license": "mit",
    "provides": {
@@ -25,11 +24,11 @@
    },
    "resources": {
       "bugtracker": {
-         "web": "https://github.com/tembo-io/pg-jsonschema-boon/issues/"
+         "web": "https://github.com/theory/pg-jsonschema-boon/issues/"
       },
       "repository": {
-         "url": "git://github.com/tembo-io/pg-jsonschema-boon.git",
-         "web": "https://github.com/tembo-io/pg-jsonschema-boon/",
+         "url": "git://github.com/theory/pg-jsonschema-boon.git",
+         "web": "https://github.com/theory/pg-jsonschema-boon/",
          "type": "git"
       }
    },

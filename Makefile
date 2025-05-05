@@ -68,7 +68,7 @@ pgxn-zip: $(DISTNAME)-$(DISTVERSION).zip
 
 .PHONY: release-notes # Show release notes for current version (must have `mknotes` in PATH).
 release-notes: CHANGELOG.md
-	mknotes -v v$(DISTVERSION) -f $< -r https://github.com/$(or $(GITHUB_REPOSITORY),tembo-io/pg-jsonschema-boon)
+	mknotes -v v$(DISTVERSION) -f $< -r https://github.com/$(or $(GITHUB_REPOSITORY),theory/pg-jsonschema-boon)
 
 ## vendor: Vendor all crates.io and git dependencies.
 vendor:
