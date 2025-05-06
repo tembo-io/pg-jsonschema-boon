@@ -34,6 +34,8 @@ fi
 
 export LLVM_PROFILE_FILE="${DESTDIR}/default_%m_%p.profraw"
 cargo pgrx test "${coverargs[@]}" "pg${PGVERSION}"
+ls -lah "${DESTDIR}/"
+ls -lah "${DESTDIR}/"*.profraw | wc -l
 
 grcov "${DESTDIR}" \
     --keep-only src/lib.rs \
