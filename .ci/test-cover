@@ -34,22 +34,21 @@ fi
 
 export LLVM_PROFILE_FILE="${DESTDIR}/default_%m_%p.profraw"
 cargo pgrx test "${coverargs[@]}" "pg${PGVERSION}"
+ls -lah "${DESTDIR}/"
+ls -lah "${DESTDIR}/"*.profraw | wc -l
 
 grcov "${DESTDIR}" \
-    --ignore '**/clang-sys*/**' \
-    --ignore '**/pgrx-pg-sys*/**' \
-    --ignore "$HOME/.cargo/**" \
+    --keep-only src/lib.rs \
     --ignore-not-existing \
-    --excl-start 'begin_impossible!' \
-    --excl-stop 'end_impossible!' \
+    --excl-line 'unreachable!' \
     --llvm \
     --binary-path "target/debug/" \
     -s . \
     --branch \
     -o "${DESTDIR}" \
-    --output-types html,cobertura
+    --output-types html,cobertura,markdown
 
-xmllint --xpath "concat('Coverage: ', 100 * string(//coverage/@line-rate), '%')" "${DESTDIR}/cobertura.xml"
+cat "${DESTDIR}/markdown.md"
 
 if [ "$(uname -o)" = "Darwin" ] && [ -z "$CI" ]; then
 	open "${DESTDIR}/html/index.html"
