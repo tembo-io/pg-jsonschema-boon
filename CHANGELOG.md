@@ -20,6 +20,7 @@ All notable changes to this project will be documented in this file. It uses the
 *   Removed the `$libdir/` prefix from `module_pathname`, so if the module is
     installed elsewhere in `dynamic_library_path` Postgres will be able to
     find it.
+*   Moved from the `tembo-io` org to `theory` on GitHub.
 
   [v0.1.7]: https://github.com/theory/pg-jsonschema-boon/compare/v0.1.6...v0.1.7
 

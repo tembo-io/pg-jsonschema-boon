@@ -162,7 +162,7 @@ SOFTWARE.
   [pgxn]: https://pgxn.org/dist/jsonschema "⚙️ PGXN Version"
   [ci-badge]: https://github.com/theory/pg-jsonschema-boon/actions/workflows/lint-and-test.yml/badge.svg "🧪 Lint and Test"
   [ci]: https://github.com/theory/pg-jsonschema-boon/actions/workflows/lint-and-test.yml "🧪 Lint and Test"
-  [cov-badge]: https://codecov.io/gh/theory/pg-jsonschema-boon/graph/badge.svg?token=DIFED324ZY "📊 Code Coverage"
+  [cov-badge]: https://codecov.io/gh/theory/pg-jsonschema-boon/graph/badge.svg?token=qSykIZHAYB "📊 Code Coverage"
   [cov]: https://codecov.io/gh/theory/pg-jsonschema-boon "📊 Code Coverage"
   [deps-badge]: https://deps.rs/repo/github/theory/pg-jsonschema-boon/status.svg "📦 Dependency Status"
   [deps]: https://deps.rs/repo/github/theory/pg-jsonschema-boon "📦 Dependency Status"

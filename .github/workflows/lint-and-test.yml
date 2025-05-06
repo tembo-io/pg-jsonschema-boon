@@ -50,7 +50,6 @@ jobs:
         uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          slug: theory/pg-jsonschema-boon
           files: target/cover/cobertura.xml
       - name: Clear Badge Cache
         uses: kevincobain2000/action-camo-purge@v1
