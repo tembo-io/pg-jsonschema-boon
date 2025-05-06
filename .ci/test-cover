@@ -38,8 +38,7 @@ cargo pgrx test "${coverargs[@]}" "pg${PGVERSION}"
 grcov "${DESTDIR}" \
     --keep-only src/lib.rs \
     --ignore-not-existing \
-    --excl-start 'begin_impossible!' \
-    --excl-stop 'end_impossible!' \
+    --excl-line 'unreachable!' \
     --llvm \
     --binary-path "target/debug/" \
     -s . \
